@@ -2,3 +2,5 @@
 .DS_Store
 *_files/
 /.luarc.json
+
+/.quarto/

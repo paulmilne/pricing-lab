@@ -14,8 +14,9 @@ strategies — **price off the mean** vs. **price off the P90 floor** (`P90 cost
 framework rule) — and watch the Monte-Carlo loss rates.
 
 ::: {.callout-note appearance="simple"}
-This module runs **real R in your browser** via WebAssembly, so the first load takes a few
-seconds while the R runtime downloads. After that it's instant and fully offline.
+This module runs **real R in your browser** via WebAssembly. The first load takes a few
+seconds while the R runtime downloads from a CDN (so you need a connection on first visit);
+after that it's cached and responsive.
 :::
 
 ```{shinylive-r}
