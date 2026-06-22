@@ -1,0 +1,234 @@
+---
+title: "M5 Outcome Designer"
+subtitle: "Design a value-share that survives scale"
+---
+
+An M5 fee is never simply "a percent of value." It's a **clamped** — and ideally
+**tiered** — function:
+
+$$\text{Fee} = \max\big(\text{Floor},\ \min(\text{Ceiling},\ \text{Value} \times \text{Share}\%)\big)$$
+
+Set the floor, ceiling, and share below, then watch the fee curve. The lesson lands fast:
+a **flat share** looks fine at small value but becomes a renegotiation magnet at scale — a
+**tiered (Lehman-style)** schedule stays durable.
+
+## Design the deal
+
+```{ojs}
+//| label: inputs
+viewof m4base   = Inputs.range([2000, 40000],   {value: 10000, step: 500,  label: "Equivalent M4 base fee (£/mo)"})
+viewof floorPct = Inputs.range([0.6, 0.8],       {value: 0.8,   step: 0.05, label: "Floor (× M4 base)"})
+viewof ceilMult = Inputs.range([3, 5],           {value: 4,     step: 0.5,  label: "Ceiling (× floor)"})
+viewof valueType = Inputs.select([
+  "Cost takeout (labour replaced)",
+  "Cost avoidance (fraud, penalties)",
+  "Revenue uplift (attributed)",
+  "Risk reduction (liability avoided)"
+], {label: "Value type", value: "Cost takeout (labour replaced)"})
+viewof flatShare = Inputs.range([0.01, 0.06],    {value: 0.03,  step: 0.005, label: "Flat share %"})
+viewof expValue  = Inputs.range([0, 5000000],    {value: 1000000, step: 50000, label: "Expected monthly value (£)"})
+```
+
+```{ojs}
+//| label: tiered-inputs
+//| code-summary: ""
+viewof useTiered = Inputs.toggle({value: true, label: "Show tiered (Lehman) schedule"})
+```
+
+::: {.callout-note collapse="true" title="Tiered (Lehman) schedule — edit the steps"}
+
+```{ojs}
+//| label: tier-edit
+viewof t1rate = Inputs.range([0.01, 0.06], {value: 0.04,  step: 0.005, label: "Rate on first band"})
+viewof t1cap  = Inputs.range([100000, 1000000], {value: 500000, step: 50000, label: "First band up to (£/mo)"})
+viewof t2rate = Inputs.range([0.01, 0.05], {value: 0.025, step: 0.005, label: "Rate on second band"})
+viewof t2cap  = Inputs.range([1000000, 3000000], {value: 2000000, step: 100000, label: "Second band up to (£/mo)"})
+viewof t3rate = Inputs.range([0.005, 0.03],{value: 0.01,  step: 0.005, label: "Rate above second band"})
+```
+
+:::
+
+```{ojs}
+//| label: engine
+chartMax = 5000000
+
+floor   = m4base * floorPct
+ceiling = ceilMult * floor
+
+clamp = (x) => Math.max(floor, Math.min(ceiling, x))
+
+flatRaw   = (v) => v * flatShare
+tieredRaw = (v) => t1rate * Math.min(v, t1cap)
+                 + t2rate * Math.max(0, Math.min(v, t2cap) - t1cap)
+                 + t3rate * Math.max(0, v - t2cap)
+
+flatFee   = (v) => clamp(flatRaw(v))
+tieredFee = (v) => clamp(tieredRaw(v))
+
+binding = (raw) => raw <= floor ? "floor binds" : raw >= ceiling ? "ceiling binds" : "share applies"
+
+shareBand = ({
+  "Cost takeout (labour replaced)":     "3–5%",
+  "Cost avoidance (fraud, penalties)":  "2–4%",
+  "Revenue uplift (attributed)":        "2–4%",
+  "Risk reduction (liability avoided)": "2–5%"
+})[valueType]
+
+gbp  = (x) => "£" + Math.round(x).toLocaleString("en-GB")
+gbpC = (x) => x >= 1e6 ? "£" + (x/1e6).toFixed(x >= 1e7 ? 0 : 2) + "M"
+            : x >= 1e3 ? "£" + Math.round(x/1e3) + "k" : "£" + Math.round(x)
+axisFmt = (s) => s >= 1e6 ? "£" + (s/1e6) + "M" : s >= 1e3 ? "£" + (s/1e3) + "k" : "£" + s
+pct  = (x) => (100*x).toFixed(1) + "%"
+
+curve = {
+  const n = 240, a = [];
+  for (let i = 0; i <= n; i++) {
+    const v = chartMax * i / n;
+    a.push({v, fee: flatFee(v), series: "Flat share"});
+    if (useTiered) a.push({v, fee: tieredFee(v), series: "Tiered (Lehman)"});
+  }
+  return a;
+}
+
+effCurve = {
+  const n = 240, a = [];
+  for (let i = 1; i <= n; i++) {
+    const v = chartMax * i / n;
+    a.push({v, eff: 100 * flatFee(v) / v, series: "Flat share"});
+    if (useTiered) a.push({v, eff: 100 * tieredFee(v) / v, series: "Tiered (Lehman)"});
+  }
+  return a;
+}
+
+palette = ({"Flat share": "#C0392B", "Tiered (Lehman)": "#4AA82D"})
+
+opPoints = useTiered
+  ? [{v: expValue, fee: flatFee(expValue), series: "Flat share"},
+     {v: expValue, fee: tieredFee(expValue), series: "Tiered (Lehman)"}]
+  : [{v: expValue, fee: flatFee(expValue), series: "Flat share"}]
+```
+
+```{ojs}
+//| label: hint
+html`<div style="font-size:.9em;color:#555;margin:-.3em 0 .4em;">
+  Recommended share for <b>${valueType}</b>: <b>${shareBand}</b>.
+  Floor = ${gbp(floor)}/mo · Ceiling = ${gbp(ceiling)}/mo.</div>`
+```
+
+## Fee vs. value delivered
+
+```{ojs}
+//| label: feechart
+Plot.plot({
+  marginLeft: 70, marginBottom: 40, height: 360,
+  x: {label: "Monthly value delivered →", tickFormat: axisFmt, grid: true},
+  y: {label: "↑ Monthly fee to Atos", tickFormat: axisFmt, grid: true},
+  color: {legend: true, domain: Object.keys(palette), range: Object.values(palette)},
+  marks: [
+    Plot.ruleY([floor],   {stroke: "#888", strokeDasharray: "4 3"}),
+    Plot.ruleY([ceiling], {stroke: "#00005C", strokeDasharray: "4 3"}),
+    Plot.text([{y: floor, t: "floor " + gbpC(floor)}],
+      {x: 0, y: "y", text: "t", textAnchor: "start", dy: -5, fill: "#888", fontSize: 11}),
+    Plot.text([{y: ceiling, t: "ceiling " + gbpC(ceiling)}],
+      {x: 0, y: "y", text: "t", textAnchor: "start", dy: -5, fill: "#00005C", fontSize: 11}),
+    Plot.line(curve, {x: "v", y: "fee", stroke: "series", strokeWidth: 2.5}),
+    Plot.ruleX([expValue], {stroke: "#bbb", strokeDasharray: "2 2"}),
+    Plot.dot(opPoints, {x: "v", y: "fee", fill: "series", r: 5, stroke: "white"}),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+## At your expected value
+
+```{ojs}
+//| label: cards
+{
+  const ev = expValue;
+  const card = (name, colour, fee, raw) => `
+    <div style="flex:1;background:${colour};color:#fff;border-radius:10px;padding:.85em 1.1em;">
+      <div style="font-size:.78em;text-transform:uppercase;letter-spacing:.05em;opacity:.9;">${name}</div>
+      <div style="font-size:1.7em;font-weight:800;">${gbp(fee)}<span style="font-size:.5em;font-weight:600;"> / mo</span></div>
+      <div style="font-size:.9em;margin-top:.3em;">
+        ${binding(raw)} · effective ${pct(fee/ev)} · ${gbp(fee*12)}/yr
+      </div>
+    </div>`;
+  const flat = card("Flat share", "#C0392B", flatFee(ev), flatRaw(ev));
+  const tier = useTiered ? card("Tiered (Lehman)", "#4AA82D", tieredFee(ev), tieredRaw(ev)) : "";
+  return html([`<div style="display:flex;gap:.8em;">${flat}${tier}</div>`]);
+}
+```
+
+```{ojs}
+//| label: flag
+{
+  const ev = expValue, ff = flatFee(ev), tf = tieredFee(ev), fr = flatRaw(ev);
+  let level, msg;
+  if (fr >= ceiling) {
+    level = "warn";
+    msg = `At ${gbpC(ev)} the flat share would blow through the ceiling — the cap is doing all the work, and the headline % will feel unfair to the customer. A tiered schedule lands more naturally.`;
+  } else if (useTiered && ff > 1.25 * tf) {
+    level = "warn";
+    msg = `The flat fee (${gbpC(ff)}) is ${(ff/tf).toFixed(1)}× the tiered fee here — high renegotiation risk. At scale a flat % reads as a windfall; the tiered schedule defuses it.`;
+  } else {
+    level = "ok";
+    msg = `At ${gbpC(ev)} the schedules are close and either is defensible — but the gap widens as value grows. Lock the tiered steps in now.`;
+  }
+  const c = level === "warn" ? "#E8830C" : "#4AA82D";
+  return html`<div style="border-left:5px solid ${c};background:${c}14;padding:.7em 1em;border-radius:8px;font-size:.98em;">
+    <b style="color:${c};">${level === "warn" ? "⚠ Renegotiation risk" : "✓ Balanced"}</b> — ${msg}</div>`;
+}
+```
+
+## Who keeps the value?
+
+```{ojs}
+//| label: surplus
+{
+  const ev = expValue;
+  const fee = useTiered ? tieredFee(ev) : flatFee(ev);
+  const keep = Math.max(0, ev - fee);
+  const fp = 100 * fee / ev, kp = 100 * keep / ev;
+  return html`<div>
+    <div style="display:flex;height:34px;border-radius:7px;overflow:hidden;font-size:.82em;color:#fff;font-weight:700;">
+      <div style="width:${fp}%;background:#4AA82D;display:flex;align-items:center;justify-content:center;min-width:fit-content;padding:0 .4em;">
+        Atos ${pct(fee/ev)}</div>
+      <div style="width:${kp}%;background:#0073E6;display:flex;align-items:center;justify-content:center;padding:0 .4em;">
+        Customer keeps ${pct(keep/ev)}</div>
+    </div>
+    <div style="font-size:.9em;color:#555;margin-top:.4em;">
+      Atos captures <b>${gbp(fee)}/mo</b>; the customer retains <b>${gbp(keep)}/mo</b> of the value created.
+      Growing the pool beats grabbing a bigger slice — 3% of £10M beats 15% of £1M.</div>
+  </div>`;
+}
+```
+
+## Effective share — why flat doesn't scale
+
+```{ojs}
+//| label: effchart
+Plot.plot({
+  marginLeft: 50, marginBottom: 40, height: 300,
+  x: {label: "Monthly value delivered →", tickFormat: axisFmt, grid: true},
+  y: {label: "↑ effective share (fee ÷ value)", tickFormat: d => d + "%", grid: true,
+      domain: [0, Math.max(flatShare, t1rate) * 100 * 1.25]},
+  color: {legend: true, domain: Object.keys(palette), range: Object.values(palette)},
+  marks: [
+    Plot.line(effCurve, {x: "v", y: "eff", stroke: "series", strokeWidth: 2.5}),
+    Plot.ruleX([expValue], {stroke: "#bbb", strokeDasharray: "2 2"}),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+The flat line stays constant until the **ceiling** clips it, then decays. The tiered line
+**steps down smoothly** — capturing more where Atos contribution is proportionally highest
+(low-to-mid value) and compressing where the customer's own operational context dominates.
+That declining curve is exactly what makes a tiered schedule feel fair, and survive renewal.
+
+::: {.callout-warning collapse="true"}
+## Illustrative
+Constants teach the shape, not a real deal. M5 also requires L4 autonomy, an audited
+baseline, E&O insurance, and CoE Director approval — see the
+[Model Selector](decision-tree.qmd).
+:::

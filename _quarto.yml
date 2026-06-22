@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: docs          # GitHub Pages: serve from /docs on the main branch
+  resources:
+    - .nojekyll             # keep this copied into docs/ on every render (disables Jekyll)
 
 website:
   title: "Agentic AI Pricing Lab"
@@ -16,6 +18,8 @@ website:
         text: "Five-Model Comparator"
       - href: token-distribution.qmd
         text: "Token Distribution"
+      - href: outcome-designer.qmd
+        text: "M5 Outcome Designer"
   page-footer:
     left: "Agentic AI Pricing Lab · Engineering Academy 2026"
     right: "Built with Quarto + Observable JS"
