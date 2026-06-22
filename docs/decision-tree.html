@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Model Selector – Agentic AI Pricing Lab</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-0815c480559380816a4d1ea211a47e91.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fd2ced95396e46133fbf8d7370d09dcd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script type="module" src="site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Agentic AI Pricing Lab</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./decision-tree.html" aria-current="page"> 
+<span class="menu-text">Model Selector</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./comparator.html"> 
+<span class="menu-text">Five-Model Comparator</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Model Selector</h1>
+<p class="subtitle lead">Answer a few questions, get a recommended pricing model</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This walks the same decision tree as the CoE Model Selection Guide. Click your way through — each answer reveals the next question, and your recommendation appears at the end. Click any crumb in the trail to jump back and explore a different branch.</p>
+<blockquote class="blockquote">
+<p>Start with the question that organises everything: <strong>who actually operates the AI, and who carries the risk if it goes wrong?</strong></p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb1" data-startfrom="14" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 13;"><span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`&lt;style&gt;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="vs">  .dt-card{display:flex;gap:.85em;align-items:center;border:1.5px solid #e1e5ec;border-radius:11px;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="vs">    padding:.85em 1.1em;margin:.55em 0;cursor:pointer;background:#fff;transition:all .14s ease;}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="vs">  .dt-card:hover{border-color:#0073E6;box-shadow:0 3px 14px rgba(0,115,230,.16);transform:translateY(-1px);}</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="vs">  .dt-ico{font-size:1.7em;line-height:1;}</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="vs">  .dt-t{font-weight:700;font-size:1.06em;}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="vs">  .dt-s{color:#6a7180;font-size:.9em;margin-top:.1em;}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="vs">  .dt-q{font-size:1.28em;font-weight:750;margin:.5em 0 .5em;}</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="vs">  .dt-crumb{display:inline-flex;align-items:center;background:#eef1f6;border-radius:20px;padding:.22em .8em;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="vs">    margin:.15em .35em .15em 0;font-size:.85em;cursor:pointer;transition:background .12s;}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="vs">  .dt-crumb:hover{background:#dde3ec;}</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="vs">  .risk-btn{display:inline-block;border:1.5px solid #e1e5ec;border-radius:8px;padding:.35em .8em;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="vs">    margin:.2em .35em .2em 0;cursor:pointer;font-size:.88em;font-weight:600;transition:all .12s;}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="vs">  .risk-btn:hover{border-color:#9aa3b0;}</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="vs">&lt;/style&gt;`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="dt-style" class="cell-output cell-output-display">
+<div id="ojs-cell-1" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb2" data-startfrom="33" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 32;"><span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">// One reactive state object. Every click writes a NEW object here, which re-runs</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">// the render cell below and emits a fresh node — the robust Quarto OJS idiom.</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>mutable dt_state <span class="op">=</span> ({<span class="dt">current</span><span class="op">:</span> <span class="st">"start"</span><span class="op">,</span> <span class="dt">path</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">risk</span><span class="op">:</span> <span class="st">"med"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="dt-state" class="cell-output cell-output-display">
+<div id="ojs-cell-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div id="dt-data" class="cell">
+<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="41" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 40;"><span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>T1  <span class="op">=</span> [<span class="st">"Risk stays inside the org — price for cost recovery (0–20% margin)."</span><span class="op">,</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Never under-price: FTE cost × replacement ratio is the floor, not infra cost."</span>]</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>AID <span class="op">=</span> [<span class="st">"Price the market rate for the DELIVERABLE — not your reduced cost. The efficiency gain is your margin."</span>]</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>T2  <span class="op">=</span> [<span class="st">"Differentiate on vertical compliance depth — not unit price. Hyperscalers win on cost."</span>]</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>T3  <span class="op">=</span> [<span class="st">"Hold risk reserves of 10–20% of revenue; open-ended liability lives here."</span>]</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>RISK <span class="op">=</span> [</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">key</span><span class="op">:</span><span class="st">"low"</span><span class="op">,</span>  <span class="dt">label</span><span class="op">:</span><span class="st">"Low (1–3)"</span><span class="op">,</span>       <span class="dt">color</span><span class="op">:</span><span class="st">"#4AA82D"</span><span class="op">,</span> <span class="dt">approval</span><span class="op">:</span><span class="st">"Self-service / CoE notification"</span>}<span class="op">,</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">key</span><span class="op">:</span><span class="st">"med"</span><span class="op">,</span>  <span class="dt">label</span><span class="op">:</span><span class="st">"Medium (4–6)"</span><span class="op">,</span>    <span class="dt">color</span><span class="op">:</span><span class="st">"#0073E6"</span><span class="op">,</span> <span class="dt">approval</span><span class="op">:</span><span class="st">"CoE approval"</span>}<span class="op">,</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">key</span><span class="op">:</span><span class="st">"high"</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span><span class="st">"High (7–8)"</span><span class="op">,</span>      <span class="dt">color</span><span class="op">:</span><span class="st">"#E8830C"</span><span class="op">,</span> <span class="dt">approval</span><span class="op">:</span><span class="st">"Executive approval"</span>}<span class="op">,</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">key</span><span class="op">:</span><span class="st">"crit"</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span><span class="st">"Critical (9–10)"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#C0392B"</span><span class="op">,</span> <span class="dt">approval</span><span class="op">:</span><span class="st">"Board approval + E&amp;O insurance mandatory"</span>}<span class="op">,</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">// Promoted gate/clause boxes (mirror the AID_GATE and CLAUSE nodes in the document)</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>GATE   <span class="op">=</span> ({<span class="dt">icon</span><span class="op">:</span><span class="st">"✋"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#E8830C"</span><span class="op">,</span> <span class="dt">text</span><span class="op">:</span><span class="st">"MANDATORY QUALITY GATE — a human reviews every AI output before it reaches the customer."</span>})</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>CLAUSE <span class="op">=</span> ({<span class="dt">icon</span><span class="op">:</span><span class="st">"📌"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#663894"</span><span class="op">,</span> <span class="dt">text</span><span class="op">:</span><span class="st">"ADD THE M5 OPTION CLAUSE AT SIGNATURE — agree the metric, baseline, floor and ceiling now, never retrofit at renewal."</span>})</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>TREE <span class="op">=</span> ({</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>  <span class="dt">start</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"Who operates the AI — and who carries the risk?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"internal"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"🏢"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Our internal team"</span><span class="op">,</span> <span class="dt">sub</span><span class="op">:</span><span class="st">"Employees use it; value and risk stay inside the org"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"t1obj"</span>}<span class="op">,</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"aid"</span><span class="op">,</span>      <span class="dt">icon</span><span class="op">:</span><span class="st">"🛠️"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"We deliver with it"</span><span class="op">,</span>  <span class="dt">sub</span><span class="op">:</span><span class="st">"Our team uses the AI to produce work for a customer"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"aidContract"</span>}<span class="op">,</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"external"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"🤝"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"The customer drives it"</span><span class="op">,</span> <span class="dt">sub</span><span class="op">:</span><span class="st">"The external customer operates the agent themselves"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"namedRole"</span>}<span class="op">,</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>  <span class="dt">t1obj</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"What is the primary objective?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"fte"</span><span class="op">,</span>   <span class="dt">icon</span><span class="op">:</span><span class="st">"👥"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Replace / reduce headcount"</span><span class="op">,</span> <span class="dt">sub</span><span class="op">:</span><span class="st">"FTE-benchmarked"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t1_m1"</span>}<span class="op">,</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"usage"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"📊"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Recover variable running costs"</span><span class="op">,</span> <span class="dt">sub</span><span class="op">:</span><span class="st">"Consumption-based"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t1_m2"</span>}<span class="op">,</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>  <span class="dt">aidContract</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"How does the customer pay you?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"task"</span><span class="op">,</span>    <span class="dt">icon</span><span class="op">:</span><span class="st">"📦"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Fixed price per defined deliverable"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_aid_m3"</span>}<span class="op">,</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"tm"</span><span class="op">,</span>      <span class="dt">icon</span><span class="op">:</span><span class="st">"⏱️"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Time &amp; materials at a professional rate"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_aid_m1"</span>}<span class="op">,</span></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"outcome"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"🎯"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"On the business outcome achieved"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"aidGates"</span>}<span class="op">,</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>  <span class="dt">aidGates</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"Are ALL outcome gates met?  (L4+ autonomy · audited baseline · attribution independently verifiable)"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"yes"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"✅"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Yes — every gate is met"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_aid_m5"</span>}<span class="op">,</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"no"</span><span class="op">,</span>  <span class="dt">icon</span><span class="op">:</span><span class="st">"🚧"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Not yet"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_aid_m4"</span>}<span class="op">,</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>  <span class="dt">namedRole</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"Does the agent take a named role and exercise judgment for the customer?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"no"</span><span class="op">,</span>  <span class="dt">icon</span><span class="op">:</span><span class="st">"🔧"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"No — a tool under the customer's direction"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"t2auto"</span>}<span class="op">,</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"yes"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"🧑‍💼"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Yes — the customer delegates outcomes to it"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"prod"</span>}<span class="op">,</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>  <span class="dt">prod</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"Does it clear the productivity gate — at least 1.2× a human?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"yes"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"🚀"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Yes (≥ 1.2×)"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"t3gates"</span>}<span class="op">,</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"no"</span><span class="op">,</span>  <span class="dt">icon</span><span class="op">:</span><span class="st">"🐢"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"No (&lt; 1.2×)"</span><span class="op">,</span> <span class="dt">sub</span><span class="op">:</span><span class="st">"Stay at Tier 2"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"t2auto"</span>}<span class="op">,</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>  <span class="dt">t2auto</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"Customer maturity &amp; autonomy level?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"low"</span><span class="op">,</span>  <span class="dt">icon</span><span class="op">:</span><span class="st">"🔌"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"L1–L2 · an API or task service"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"t2charge"</span>}<span class="op">,</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"high"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"🔗"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"L3+ · integration depth is growing"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t2_m4"</span>}<span class="op">,</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>  <span class="dt">t2charge</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"Preferred charging basis?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"usage"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"📊"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Volume / token consumption"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t2_m2"</span>}<span class="op">,</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"task"</span><span class="op">,</span>  <span class="dt">icon</span><span class="op">:</span><span class="st">"📦"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Per task or deliverable"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t2_m3"</span>}<span class="op">,</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>  <span class="dt">t3gates</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"L4+ autonomy AND customer maturity assessed as High?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"yes"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"✅"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Yes — all gates met"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"t3attr"</span>}<span class="op">,</span></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"no"</span><span class="op">,</span>  <span class="dt">icon</span><span class="op">:</span><span class="st">"🚧"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Not yet"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"t3entry"</span>}<span class="op">,</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>  <span class="dt">t3entry</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"Entry model for Tier 3?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"seat"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"🪑"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"FTE-benchmarked role pricing"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t3_m1"</span>}<span class="op">,</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"task"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"📦"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Per deliverable"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t3_m3"</span>}<span class="op">,</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>  <span class="dt">t3attr</span><span class="op">:</span> {<span class="dt">q</span><span class="op">:</span> <span class="st">"Can the outcome be verified by a system neither party controls?"</span><span class="op">,</span> <span class="dt">opts</span><span class="op">:</span> [</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"yes"</span><span class="op">,</span> <span class="dt">icon</span><span class="op">:</span><span class="st">"🛰️"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"Yes — independently verifiable"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t3_m5"</span>}<span class="op">,</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">key</span><span class="op">:</span><span class="st">"no"</span><span class="op">,</span>  <span class="dt">icon</span><span class="op">:</span><span class="st">"⚖️"</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span><span class="st">"No / contested"</span><span class="op">,</span> <span class="dt">next</span><span class="op">:</span><span class="st">"r_t3_m4"</span>}<span class="op">,</span></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>  ]}<span class="op">,</span></span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ---------- results ----------</span></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t1_m1</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 1 · Internal Operations"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#0073E6"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M1 · Per Seat"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>T1}}<span class="op">,</span></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t1_m2</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 1 · Internal Operations"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#0073E6"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M2 · Usage"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>T1}}<span class="op">,</span></span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_aid_m3</span><span class="op">:</span>{<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"AI-Augmented Delivery"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#4AA82D"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M3 · Task-Based"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>AID<span class="op">,</span> <span class="dt">badges</span><span class="op">:</span>[GATE]}}<span class="op">,</span></span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_aid_m1</span><span class="op">:</span>{<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"AI-Augmented Delivery"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#4AA82D"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M1 · Per Seat (manday rate)"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>AID<span class="op">,</span> <span class="dt">badges</span><span class="op">:</span>[GATE]}}<span class="op">,</span></span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_aid_m5</span><span class="op">:</span>{<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"AI-Augmented Delivery"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#4AA82D"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M5 · Outcome-Based"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>[<span class="op">...</span>AID<span class="op">,</span> <span class="st">"Outcome must be verifiable against the original project estimate."</span>]<span class="op">,</span> <span class="dt">badges</span><span class="op">:</span>[GATE]}}<span class="op">,</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_aid_m4</span><span class="op">:</span>{<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"AI-Augmented Delivery"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#4AA82D"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M4 · Hybrid (+ M5 option clause)"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>AID<span class="op">,</span> <span class="dt">badges</span><span class="op">:</span>[GATE]}}<span class="op">,</span></span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t2_m4</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 2 · Platform Services"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#663894"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M4 · Hybrid"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>T2<span class="op">,</span> <span class="dt">badges</span><span class="op">:</span>[CLAUSE]}}<span class="op">,</span></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t2_m2</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 2 · Platform Services"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#663894"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M2 · Usage"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>[<span class="op">...</span>T2<span class="op">,</span> <span class="st">"Put consumption caps in the contract — guard against bill shock."</span>]}}<span class="op">,</span></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t2_m3</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 2 · Platform Services"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#663894"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M3 · Task-Based"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>[<span class="op">...</span>T2<span class="op">,</span> <span class="st">"Set the task-price floor from P90 token cost, not the mean."</span>]}}<span class="op">,</span></span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t3_m1</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 3 · Digital Labour"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#EF5E82"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M1 · Per Seat"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>[<span class="op">...</span>T3<span class="op">,</span> <span class="st">"Not yet at full Tier 3 gates — enter here and build toward M5."</span>]}}<span class="op">,</span></span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t3_m3</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 3 · Digital Labour"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#EF5E82"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M3 · Task-Based"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>[<span class="op">...</span>T3<span class="op">,</span> <span class="st">"Per-deliverable pricing builds the baseline data you'll need for outcomes."</span>]}}<span class="op">,</span></span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t3_m5</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 3 · Digital Labour"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#EF5E82"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M5 · Outcome-Based"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>[<span class="op">...</span>T3<span class="op">,</span> <span class="st">"Mandatory: E&amp;O insurance, audited baseline, 24-month term, CoE Director approval."</span>]}}<span class="op">,</span></span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>  <span class="dt">r_t3_m4</span><span class="op">:</span> {<span class="dt">result</span><span class="op">:</span>{<span class="dt">tier</span><span class="op">:</span><span class="st">"Tier 3 · Digital Labour"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span><span class="st">"#EF5E82"</span><span class="op">,</span> <span class="dt">model</span><span class="op">:</span><span class="st">"M4 · Hybrid (+ M5 option clause)"</span><span class="op">,</span> <span class="dt">notes</span><span class="op">:</span>[<span class="op">...</span>T3<span class="op">,</span> <span class="st">"Attribution contested — fall back to hybrid and keep the M5 option open."</span>]<span class="op">,</span> <span class="dt">badges</span><span class="op">:</span>[CLAUSE]}}<span class="op">,</span></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="dt-data-1">
+<div id="ojs-cell-3-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="dt-data-2">
+<div id="ojs-cell-3-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="dt-data-3">
+<div id="ojs-cell-3-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="dt-data-4">
+<div id="ojs-cell-3-4" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="dt-data-5">
+<div id="ojs-cell-3-5" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="dt-data-6">
+<div id="ojs-cell-3-6" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="dt-data-7">
+<div id="ojs-cell-3-7" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="dt-data-8">
+<div id="ojs-cell-3-8" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="123" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 122;"><span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> s <span class="op">=</span> dt_state<span class="op">;</span>                        <span class="co">// reactive dependency — re-runs on each click</span></span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> wrap <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ---- breadcrumb trail ----</span></span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> bc <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div style="margin-bottom:.7em;"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> start <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;span class="dt-crumb"&gt;↻ Start over&lt;/span&gt;`</span><span class="op">;</span></span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>  start<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> { mutable dt_state <span class="op">=</span> {<span class="dt">current</span><span class="op">:</span><span class="st">"start"</span><span class="op">,</span> <span class="dt">path</span><span class="op">:</span>[]<span class="op">,</span> <span class="dt">risk</span><span class="op">:</span>s<span class="op">.</span><span class="at">risk</span>}<span class="op">;</span> })<span class="op">;</span></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>  bc<span class="op">.</span><span class="fu">append</span>(start)<span class="op">;</span></span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>  s<span class="op">.</span><span class="at">path</span><span class="op">.</span><span class="fu">forEach</span>((p<span class="op">,</span> i) <span class="kw">=&gt;</span> {</span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> cr <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;span class="dt-crumb"&gt;</span><span class="sc">${</span>p<span class="op">.</span><span class="at">title</span><span class="sc">}</span><span class="vs">&lt;/span&gt;`</span><span class="op">;</span></span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>    cr<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> { mutable dt_state <span class="op">=</span> {<span class="dt">current</span><span class="op">:</span>p<span class="op">.</span><span class="at">node</span><span class="op">,</span> <span class="dt">path</span><span class="op">:</span>s<span class="op">.</span><span class="at">path</span><span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span>i)<span class="op">,</span> <span class="dt">risk</span><span class="op">:</span>s<span class="op">.</span><span class="at">risk</span>}<span class="op">;</span> })<span class="op">;</span></span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>    bc<span class="op">.</span><span class="fu">append</span>(cr)<span class="op">;</span></span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>  wrap<span class="op">.</span><span class="fu">append</span>(bc)<span class="op">;</span></span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> node <span class="op">=</span> TREE[s<span class="op">.</span><span class="at">current</span>]<span class="op">;</span></span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (node<span class="op">.</span><span class="at">q</span>) {</span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>    wrap<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;div class="dt-q"&gt;</span><span class="sc">${</span>node<span class="op">.</span><span class="at">q</span><span class="sc">}</span><span class="vs">&lt;/div&gt;`</span>)<span class="op">;</span></span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>    node<span class="op">.</span><span class="at">opts</span><span class="op">.</span><span class="fu">forEach</span>(opt <span class="kw">=&gt;</span> {</span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> c <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div class="dt-card"&gt;</span></span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;div class="dt-ico"&gt;</span><span class="sc">${</span>opt<span class="op">.</span><span class="at">icon</span> <span class="op">||</span> <span class="st">""</span><span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;div&gt;&lt;div class="dt-t"&gt;</span><span class="sc">${</span>opt<span class="op">.</span><span class="at">title</span><span class="sc">}</span><span class="vs">&lt;/div&gt;&lt;div class="dt-s"&gt;</span><span class="sc">${</span>opt<span class="op">.</span><span class="at">sub</span> <span class="op">||</span> <span class="st">""</span><span class="sc">}</span><span class="vs">&lt;/div&gt;&lt;/div&gt;</span></span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a>      c<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>        mutable dt_state <span class="op">=</span> {</span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a>          <span class="dt">current</span><span class="op">:</span> opt<span class="op">.</span><span class="at">next</span><span class="op">,</span></span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a>          <span class="dt">path</span><span class="op">:</span> [<span class="op">...</span>s<span class="op">.</span><span class="at">path</span><span class="op">,</span> {<span class="dt">node</span><span class="op">:</span> s<span class="op">.</span><span class="at">current</span><span class="op">,</span> <span class="dt">title</span><span class="op">:</span> opt<span class="op">.</span><span class="at">title</span>}]<span class="op">,</span></span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a>          <span class="dt">risk</span><span class="op">:</span> s<span class="op">.</span><span class="at">risk</span></span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>        }<span class="op">;</span></span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a>      wrap<span class="op">.</span><span class="fu">append</span>(c)<span class="op">;</span></span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (node<span class="op">.</span><span class="at">result</span>) {</span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> r <span class="op">=</span> node<span class="op">.</span><span class="at">result</span><span class="op">;</span></span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> panel <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>    panel<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="st">"border-left:7px solid "</span><span class="op">+</span>r<span class="op">.</span><span class="at">color</span><span class="op">+</span><span class="st">";background:#f8f9fb;padding:1.1em 1.3em;border-radius:9px;"</span><span class="op">;</span></span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> tierEl <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div&gt;</span><span class="sc">${</span>r<span class="op">.</span><span class="at">tier</span><span class="sc">}</span><span class="vs">&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a>    tierEl<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="st">"font-size:.8em;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:"</span><span class="op">+</span>r<span class="op">.</span><span class="at">color</span><span class="op">+</span><span class="st">";"</span><span class="op">;</span></span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> modelEl <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div&gt;</span><span class="sc">${</span>r<span class="op">.</span><span class="at">model</span><span class="sc">}</span><span class="vs">&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>    modelEl<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="st">"font-size:1.85em;font-weight:800;margin:.12em 0 .55em;"</span><span class="op">;</span></span>
+<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a>    panel<span class="op">.</span><span class="fu">append</span>(tierEl<span class="op">,</span> modelEl)<span class="op">;</span></span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>    <span class="co">// promoted gate / clause boxes</span></span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>    (r<span class="op">.</span><span class="at">badges</span> <span class="op">||</span> [])<span class="op">.</span><span class="fu">forEach</span>(bd <span class="kw">=&gt;</span> {</span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> box <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a>      box<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="st">"display:flex;gap:.55em;align-items:flex-start;background:"</span><span class="op">+</span>bd<span class="op">.</span><span class="at">color</span><span class="op">+</span><span class="st">"14;"</span></span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> <span class="st">"border:1px solid "</span><span class="op">+</span>bd<span class="op">.</span><span class="at">color</span><span class="op">+</span><span class="st">"55;border-left:5px solid "</span><span class="op">+</span>bd<span class="op">.</span><span class="at">color</span><span class="op">+</span><span class="st">";border-radius:7px;"</span></span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> <span class="st">"padding:.6em .8em;margin:.15em 0 .6em;"</span><span class="op">;</span></span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> ic <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;span&gt;</span><span class="sc">${</span>bd<span class="op">.</span><span class="at">icon</span><span class="sc">}</span><span class="vs">&lt;/span&gt;`</span><span class="op">;</span></span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>      ic<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="st">"font-size:1.15em;line-height:1.3;"</span><span class="op">;</span></span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> tx <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;span&gt;</span><span class="sc">${</span>bd<span class="op">.</span><span class="at">text</span><span class="sc">}</span><span class="vs">&lt;/span&gt;`</span><span class="op">;</span></span>
+<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a>      tx<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="st">"font-size:.88em;font-weight:600;color:#2a2a2a;line-height:1.35;"</span><span class="op">;</span></span>
+<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a>      box<span class="op">.</span><span class="fu">append</span>(ic<span class="op">,</span> tx)<span class="op">;</span></span>
+<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a>      panel<span class="op">.</span><span class="fu">append</span>(box)<span class="op">;</span></span>
+<span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> rq <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div style="margin:.4em 0;"&gt;&lt;strong&gt;Risk level:&lt;/strong&gt; &lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a>    RISK<span class="op">.</span><span class="fu">forEach</span>(rb <span class="kw">=&gt;</span> {</span>
+<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> b <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;span class="risk-btn"&gt;</span><span class="sc">${</span>rb<span class="op">.</span><span class="at">label</span><span class="sc">}</span><span class="vs">&lt;/span&gt;`</span><span class="op">;</span></span>
+<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (s<span class="op">.</span><span class="at">risk</span> <span class="op">===</span> rb<span class="op">.</span><span class="at">key</span>) { b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">background</span> <span class="op">=</span> rb<span class="op">.</span><span class="at">color</span><span class="op">;</span> b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"#fff"</span><span class="op">;</span> b<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">borderColor</span> <span class="op">=</span> <span class="st">"transparent"</span><span class="op">;</span> }</span>
+<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a>      b<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> { mutable dt_state <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">assign</span>({}<span class="op">,</span> s<span class="op">,</span> {<span class="dt">risk</span><span class="op">:</span> rb<span class="op">.</span><span class="at">key</span>})<span class="op">;</span> })<span class="op">;</span></span>
+<span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a>      rq<span class="op">.</span><span class="fu">append</span>(b)<span class="op">;</span></span>
+<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a>    panel<span class="op">.</span><span class="fu">append</span>(rq)<span class="op">;</span></span>
+<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> appr <span class="op">=</span> RISK<span class="op">.</span><span class="fu">find</span>(x <span class="kw">=&gt;</span> x<span class="op">.</span><span class="at">key</span> <span class="op">===</span> s<span class="op">.</span><span class="at">risk</span>)<span class="op">.</span><span class="at">approval</span><span class="op">;</span></span>
+<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a>    panel<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;div style="margin:.35em 0 .7em;"&gt;&lt;strong&gt;Approval path:&lt;/strong&gt; </span><span class="sc">${</span>appr<span class="sc">}</span><span class="vs">&lt;/div&gt;`</span>)<span class="op">;</span></span>
+<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> ul <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;ul style="margin:0;padding-left:1.2em;line-height:1.55;"&gt;&lt;/ul&gt;`</span><span class="op">;</span></span>
+<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span><span class="at">notes</span><span class="op">.</span><span class="fu">forEach</span>(n <span class="kw">=&gt;</span> ul<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;li&gt;</span><span class="sc">${</span>n<span class="sc">}</span><span class="vs">&lt;/li&gt;`</span>))<span class="op">;</span></span>
+<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a>    panel<span class="op">.</span><span class="fu">append</span>(ul)<span class="op">;</span></span>
+<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a>    panel<span class="op">.</span><span class="fu">append</span>(<span class="fu">html</span><span class="vs">`&lt;div style="margin-top:.95em;font-size:.95em;"&gt;→ Now price it in the &lt;a href="comparator.html"&gt;Five-Model Comparator&lt;/a&gt;.&lt;/div&gt;`</span>)<span class="op">;</span></span>
+<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a>    wrap<span class="op">.</span><span class="fu">append</span>(panel)<span class="op">;</span></span>
+<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> wrap<span class="op">;</span></span>
+<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="dt-render" class="cell-output cell-output-display">
+<div id="ojs-cell-4" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+This is guidance, not gospel
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The tree encodes the default path for each situation. Real deals have nuance — a strong attribution story can pull a borderline case up a tier; a nervous customer can pull it down. Use the recommendation as the starting position for the commercial conversation, then apply the full CoE pre-qualification (P1–P8) before committing to M5.</p>
+</div>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6Imh0bWxgPHN0eWxlPlxuICAuZHQtY2FyZHtkaXNwbGF5OmZsZXg7Z2FwOi44NWVtO2FsaWduLWl0ZW1zOmNlbnRlcjtib3JkZXI6MS41cHggc29saWQgI2UxZTVlYztib3JkZXItcmFkaXVzOjExcHg7XG4gICAgcGFkZGluZzouODVlbSAxLjFlbTttYXJnaW46LjU1ZW0gMDtjdXJzb3I6cG9pbnRlcjtiYWNrZ3JvdW5kOiNmZmY7dHJhbnNpdGlvbjphbGwgLjE0cyBlYXNlO31cbiAgLmR0LWNhcmQ6aG92ZXJ7Ym9yZGVyLWNvbG9yOiMwMDczRTY7Ym94LXNoYWRvdzowIDNweCAxNHB4IHJnYmEoMCwxMTUsMjMwLC4xNik7dHJhbnNmb3JtOnRyYW5zbGF0ZVkoLTFweCk7fVxuICAuZHQtaWNve2ZvbnQtc2l6ZToxLjdlbTtsaW5lLWhlaWdodDoxO31cbiAgLmR0LXR7Zm9udC13ZWlnaHQ6NzAwO2ZvbnQtc2l6ZToxLjA2ZW07fVxuICAuZHQtc3tjb2xvcjojNmE3MTgwO2ZvbnQtc2l6ZTouOWVtO21hcmdpbi10b3A6LjFlbTt9XG4gIC5kdC1xe2ZvbnQtc2l6ZToxLjI4ZW07Zm9udC13ZWlnaHQ6NzUwO21hcmdpbjouNWVtIDAgLjVlbTt9XG4gIC5kdC1jcnVtYntkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtiYWNrZ3JvdW5kOiNlZWYxZjY7Ym9yZGVyLXJhZGl1czoyMHB4O3BhZGRpbmc6LjIyZW0gLjhlbTtcbiAgICBtYXJnaW46LjE1ZW0gLjM1ZW0gLjE1ZW0gMDtmb250LXNpemU6Ljg1ZW07Y3Vyc29yOnBvaW50ZXI7dHJhbnNpdGlvbjpiYWNrZ3JvdW5kIC4xMnM7fVxuICAuZHQtY3J1bWI6aG92ZXJ7YmFja2dyb3VuZDojZGRlM2VjO31cbiAgLnJpc2stYnRue2Rpc3BsYXk6aW5saW5lLWJsb2NrO2JvcmRlcjoxLjVweCBzb2xpZCAjZTFlNWVjO2JvcmRlci1yYWRpdXM6OHB4O3BhZGRpbmc6LjM1ZW0gLjhlbTtcbiAgICBtYXJnaW46LjJlbSAuMzVlbSAuMmVtIDA7Y3Vyc29yOnBvaW50ZXI7Zm9udC1zaXplOi44OGVtO2ZvbnQtd2VpZ2h0OjYwMDt0cmFuc2l0aW9uOmFsbCAuMTJzO31cbiAgLnJpc2stYnRuOmhvdmVye2JvcmRlci1jb2xvcjojOWFhM2IwO31cbjwvc3R5bGU+YFxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0yIiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoiLy8gT25lIHJlYWN0aXZlIHN0YXRlIG9iamVjdC4gRXZlcnkgY2xpY2sgd3JpdGVzIGEgTkVXIG9iamVjdCBoZXJlLCB3aGljaCByZS1ydW5zXG4vLyB0aGUgcmVuZGVyIGNlbGwgYmVsb3cgYW5kIGVtaXRzIGEgZnJlc2ggbm9kZSDigJQgdGhlIHJvYnVzdCBRdWFydG8gT0pTIGlkaW9tLlxubXV0YWJsZSBkdF9zdGF0ZSA9ICh7Y3VycmVudDogXCJzdGFydFwiLCBwYXRoOiBbXSwgcmlzazogXCJtZWRcIn0pXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTMiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJUMSAgPSBbXCJSaXNrIHN0YXlzIGluc2lkZSB0aGUgb3JnIOKAlCBwcmljZSBmb3IgY29zdCByZWNvdmVyeSAoMOKAkzIwJSBtYXJnaW4pLlwiLFxuICAgICAgIFwiTmV2ZXIgdW5kZXItcHJpY2U6IEZURSBjb3N0IMOXIHJlcGxhY2VtZW50IHJhdGlvIGlzIHRoZSBmbG9vciwgbm90IGluZnJhIGNvc3QuXCJdXG5BSUQgPSBbXCJQcmljZSB0aGUgbWFya2V0IHJhdGUgZm9yIHRoZSBERUxJVkVSQUJMRSDigJQgbm90IHlvdXIgcmVkdWNlZCBjb3N0LiBUaGUgZWZmaWNpZW5jeSBnYWluIGlzIHlvdXIgbWFyZ2luLlwiXVxuVDIgID0gW1wiRGlmZmVyZW50aWF0ZSBvbiB2ZXJ0aWNhbCBjb21wbGlhbmNlIGRlcHRoIOKAlCBub3QgdW5pdCBwcmljZS4gSHlwZXJzY2FsZXJzIHdpbiBvbiBjb3N0LlwiXVxuVDMgID0gW1wiSG9sZCByaXNrIHJlc2VydmVzIG9mIDEw4oCTMjAlIG9mIHJldmVudWU7IG9wZW4tZW5kZWQgbGlhYmlsaXR5IGxpdmVzIGhlcmUuXCJdXG5cblJJU0sgPSBbXG4gIHtrZXk6XCJsb3dcIiwgIGxhYmVsOlwiTG93ICgx4oCTMylcIiwgICAgICAgY29sb3I6XCIjNEFBODJEXCIsIGFwcHJvdmFsOlwiU2VsZi1zZXJ2aWNlIC8gQ29FIG5vdGlmaWNhdGlvblwifSxcbiAge2tleTpcIm1lZFwiLCAgbGFiZWw6XCJNZWRpdW0gKDTigJM2KVwiLCAgICBjb2xvcjpcIiMwMDczRTZcIiwgYXBwcm92YWw6XCJDb0UgYXBwcm92YWxcIn0sXG4gIHtrZXk6XCJoaWdoXCIsIGxhYmVsOlwiSGlnaCAoN+KAkzgpXCIsICAgICAgY29sb3I6XCIjRTg4MzBDXCIsIGFwcHJvdmFsOlwiRXhlY3V0aXZlIGFwcHJvdmFsXCJ9LFxuICB7a2V5OlwiY3JpdFwiLCBsYWJlbDpcIkNyaXRpY2FsICg54oCTMTApXCIsIGNvbG9yOlwiI0MwMzkyQlwiLCBhcHByb3ZhbDpcIkJvYXJkIGFwcHJvdmFsICsgRSZPIGluc3VyYW5jZSBtYW5kYXRvcnlcIn0sXG5dXG5cbi8vIFByb21vdGVkIGdhdGUvY2xhdXNlIGJveGVzIChtaXJyb3IgdGhlIEFJRF9HQVRFIGFuZCBDTEFVU0Ugbm9kZXMgaW4gdGhlIGRvY3VtZW50KVxuR0FURSAgID0gKHtpY29uOlwi4pyLXCIsIGNvbG9yOlwiI0U4ODMwQ1wiLCB0ZXh0OlwiTUFOREFUT1JZIFFVQUxJVFkgR0FURSDigJQgYSBodW1hbiByZXZpZXdzIGV2ZXJ5IEFJIG91dHB1dCBiZWZvcmUgaXQgcmVhY2hlcyB0aGUgY3VzdG9tZXIuXCJ9KVxuQ0xBVVNFID0gKHtpY29uOlwi8J+TjFwiLCBjb2xvcjpcIiM2NjM4OTRcIiwgdGV4dDpcIkFERCBUSEUgTTUgT1BUSU9OIENMQVVTRSBBVCBTSUdOQVRVUkUg4oCUIGFncmVlIHRoZSBtZXRyaWMsIGJhc2VsaW5lLCBmbG9vciBhbmQgY2VpbGluZyBub3csIG5ldmVyIHJldHJvZml0IGF0IHJlbmV3YWwuXCJ9KVxuXG5UUkVFID0gKHtcbiAgc3RhcnQ6IHtxOiBcIldobyBvcGVyYXRlcyB0aGUgQUkg4oCUIGFuZCB3aG8gY2FycmllcyB0aGUgcmlzaz9cIiwgb3B0czogW1xuICAgIHtrZXk6XCJpbnRlcm5hbFwiLCBpY29uOlwi8J+PolwiLCB0aXRsZTpcIk91ciBpbnRlcm5hbCB0ZWFtXCIsIHN1YjpcIkVtcGxveWVlcyB1c2UgaXQ7IHZhbHVlIGFuZCByaXNrIHN0YXkgaW5zaWRlIHRoZSBvcmdcIiwgbmV4dDpcInQxb2JqXCJ9LFxuICAgIHtrZXk6XCJhaWRcIiwgICAgICBpY29uOlwi8J+boO+4j1wiLCB0aXRsZTpcIldlIGRlbGl2ZXIgd2l0aCBpdFwiLCAgc3ViOlwiT3VyIHRlYW0gdXNlcyB0aGUgQUkgdG8gcHJvZHVjZSB3b3JrIGZvciBhIGN1c3RvbWVyXCIsIG5leHQ6XCJhaWRDb250cmFjdFwifSxcbiAgICB7a2V5OlwiZXh0ZXJuYWxcIiwgaWNvbjpcIvCfpJ1cIiwgdGl0bGU6XCJUaGUgY3VzdG9tZXIgZHJpdmVzIGl0XCIsIHN1YjpcIlRoZSBleHRlcm5hbCBjdXN0b21lciBvcGVyYXRlcyB0aGUgYWdlbnQgdGhlbXNlbHZlc1wiLCBuZXh0OlwibmFtZWRSb2xlXCJ9LFxuICBdfSxcbiAgdDFvYmo6IHtxOiBcIldoYXQgaXMgdGhlIHByaW1hcnkgb2JqZWN0aXZlP1wiLCBvcHRzOiBbXG4gICAge2tleTpcImZ0ZVwiLCAgIGljb246XCLwn5GlXCIsIHRpdGxlOlwiUmVwbGFjZSAvIHJlZHVjZSBoZWFkY291bnRcIiwgc3ViOlwiRlRFLWJlbmNobWFya2VkXCIsIG5leHQ6XCJyX3QxX20xXCJ9LFxuICAgIHtrZXk6XCJ1c2FnZVwiLCBpY29uOlwi8J+TilwiLCB0aXRsZTpcIlJlY292ZXIgdmFyaWFibGUgcnVubmluZyBjb3N0c1wiLCBzdWI6XCJDb25zdW1wdGlvbi1iYXNlZFwiLCBuZXh0Olwicl90MV9tMlwifSxcbiAgXX0sXG4gIGFpZENvbnRyYWN0OiB7cTogXCJIb3cgZG9lcyB0aGUgY3VzdG9tZXIgcGF5IHlvdT9cIiwgb3B0czogW1xuICAgIHtrZXk6XCJ0YXNrXCIsICAgIGljb246XCLwn5OmXCIsIHRpdGxlOlwiRml4ZWQgcHJpY2UgcGVyIGRlZmluZWQgZGVsaXZlcmFibGVcIiwgbmV4dDpcInJfYWlkX20zXCJ9LFxuICAgIHtrZXk6XCJ0bVwiLCAgICAgIGljb246XCLij7HvuI9cIiwgdGl0bGU6XCJUaW1lICYgbWF0ZXJpYWxzIGF0IGEgcHJvZmVzc2lvbmFsIHJhdGVcIiwgbmV4dDpcInJfYWlkX20xXCJ9LFxuICAgIHtrZXk6XCJvdXRjb21lXCIsIGljb246XCLwn46vXCIsIHRpdGxlOlwiT24gdGhlIGJ1c2luZXNzIG91dGNvbWUgYWNoaWV2ZWRcIiwgbmV4dDpcImFpZEdhdGVzXCJ9LFxuICBdfSxcbiAgYWlkR2F0ZXM6IHtxOiBcIkFyZSBBTEwgb3V0Y29tZSBnYXRlcyBtZXQ/ICAoTDQrIGF1dG9ub215IMK3IGF1ZGl0ZWQgYmFzZWxpbmUgwrcgYXR0cmlidXRpb24gaW5kZXBlbmRlbnRseSB2ZXJpZmlhYmxlKVwiLCBvcHRzOiBbXG4gICAge2tleTpcInllc1wiLCBpY29uOlwi4pyFXCIsIHRpdGxlOlwiWWVzIOKAlCBldmVyeSBnYXRlIGlzIG1ldFwiLCBuZXh0Olwicl9haWRfbTVcIn0sXG4gICAge2tleTpcIm5vXCIsICBpY29uOlwi8J+ap1wiLCB0aXRsZTpcIk5vdCB5ZXRcIiwgbmV4dDpcInJfYWlkX200XCJ9LFxuICBdfSxcbiAgbmFtZWRSb2xlOiB7cTogXCJEb2VzIHRoZSBhZ2VudCB0YWtlIGEgbmFtZWQgcm9sZSBhbmQgZXhlcmNpc2UganVkZ21lbnQgZm9yIHRoZSBjdXN0b21lcj9cIiwgb3B0czogW1xuICAgIHtrZXk6XCJub1wiLCAgaWNvbjpcIvCflKdcIiwgdGl0bGU6XCJObyDigJQgYSB0b29sIHVuZGVyIHRoZSBjdXN0b21lcidzIGRpcmVjdGlvblwiLCBuZXh0OlwidDJhdXRvXCJ9LFxuICAgIHtrZXk6XCJ5ZXNcIiwgaWNvbjpcIvCfp5HigI3wn5K8XCIsIHRpdGxlOlwiWWVzIOKAlCB0aGUgY3VzdG9tZXIgZGVsZWdhdGVzIG91dGNvbWVzIHRvIGl0XCIsIG5leHQ6XCJwcm9kXCJ9LFxuICBdfSxcbiAgcHJvZDoge3E6IFwiRG9lcyBpdCBjbGVhciB0aGUgcHJvZHVjdGl2aXR5IGdhdGUg4oCUIGF0IGxlYXN0IDEuMsOXIGEgaHVtYW4/XCIsIG9wdHM6IFtcbiAgICB7a2V5OlwieWVzXCIsIGljb246XCLwn5qAXCIsIHRpdGxlOlwiWWVzICjiiaUgMS4yw5cpXCIsIG5leHQ6XCJ0M2dhdGVzXCJ9LFxuICAgIHtrZXk6XCJub1wiLCAgaWNvbjpcIvCfkKJcIiwgdGl0bGU6XCJObyAoPCAxLjLDlylcIiwgc3ViOlwiU3RheSBhdCBUaWVyIDJcIiwgbmV4dDpcInQyYXV0b1wifSxcbiAgXX0sXG4gIHQyYXV0bzoge3E6IFwiQ3VzdG9tZXIgbWF0dXJpdHkgJiBhdXRvbm9teSBsZXZlbD9cIiwgb3B0czogW1xuICAgIHtrZXk6XCJsb3dcIiwgIGljb246XCLwn5SMXCIsIHRpdGxlOlwiTDHigJNMMiDCtyBhbiBBUEkgb3IgdGFzayBzZXJ2aWNlXCIsIG5leHQ6XCJ0MmNoYXJnZVwifSxcbiAgICB7a2V5OlwiaGlnaFwiLCBpY29uOlwi8J+Ul1wiLCB0aXRsZTpcIkwzKyDCtyBpbnRlZ3JhdGlvbiBkZXB0aCBpcyBncm93aW5nXCIsIG5leHQ6XCJyX3QyX200XCJ9LFxuICBdfSxcbiAgdDJjaGFyZ2U6IHtxOiBcIlByZWZlcnJlZCBjaGFyZ2luZyBiYXNpcz9cIiwgb3B0czogW1xuICAgIHtrZXk6XCJ1c2FnZVwiLCBpY29uOlwi8J+TilwiLCB0aXRsZTpcIlZvbHVtZSAvIHRva2VuIGNvbnN1bXB0aW9uXCIsIG5leHQ6XCJyX3QyX20yXCJ9LFxuICAgIHtrZXk6XCJ0YXNrXCIsICBpY29uOlwi8J+TplwiLCB0aXRsZTpcIlBlciB0YXNrIG9yIGRlbGl2ZXJhYmxlXCIsIG5leHQ6XCJyX3QyX20zXCJ9LFxuICBdfSxcbiAgdDNnYXRlczoge3E6IFwiTDQrIGF1dG9ub215IEFORCBjdXN0b21lciBtYXR1cml0eSBhc3Nlc3NlZCBhcyBIaWdoP1wiLCBvcHRzOiBbXG4gICAge2tleTpcInllc1wiLCBpY29uOlwi4pyFXCIsIHRpdGxlOlwiWWVzIOKAlCBhbGwgZ2F0ZXMgbWV0XCIsIG5leHQ6XCJ0M2F0dHJcIn0sXG4gICAge2tleTpcIm5vXCIsICBpY29uOlwi8J+ap1wiLCB0aXRsZTpcIk5vdCB5ZXRcIiwgbmV4dDpcInQzZW50cnlcIn0sXG4gIF19LFxuICB0M2VudHJ5OiB7cTogXCJFbnRyeSBtb2RlbCBmb3IgVGllciAzP1wiLCBvcHRzOiBbXG4gICAge2tleTpcInNlYXRcIiwgaWNvbjpcIvCfqpFcIiwgdGl0bGU6XCJGVEUtYmVuY2htYXJrZWQgcm9sZSBwcmljaW5nXCIsIG5leHQ6XCJyX3QzX20xXCJ9LFxuICAgIHtrZXk6XCJ0YXNrXCIsIGljb246XCLwn5OmXCIsIHRpdGxlOlwiUGVyIGRlbGl2ZXJhYmxlXCIsIG5leHQ6XCJyX3QzX20zXCJ9LFxuICBdfSxcbiAgdDNhdHRyOiB7cTogXCJDYW4gdGhlIG91dGNvbWUgYmUgdmVyaWZpZWQgYnkgYSBzeXN0ZW0gbmVpdGhlciBwYXJ0eSBjb250cm9scz9cIiwgb3B0czogW1xuICAgIHtrZXk6XCJ5ZXNcIiwgaWNvbjpcIvCfm7DvuI9cIiwgdGl0bGU6XCJZZXMg4oCUIGluZGVwZW5kZW50bHkgdmVyaWZpYWJsZVwiLCBuZXh0Olwicl90M19tNVwifSxcbiAgICB7a2V5Olwibm9cIiwgIGljb246XCLimpbvuI9cIiwgdGl0bGU6XCJObyAvIGNvbnRlc3RlZFwiLCBuZXh0Olwicl90M19tNFwifSxcbiAgXX0sXG4gIC8vIC0tLS0tLS0tLS0gcmVzdWx0cyAtLS0tLS0tLS0tXG4gIHJfdDFfbTE6IHtyZXN1bHQ6e3RpZXI6XCJUaWVyIDEgwrcgSW50ZXJuYWwgT3BlcmF0aW9uc1wiLCBjb2xvcjpcIiMwMDczRTZcIiwgbW9kZWw6XCJNMSDCtyBQZXIgU2VhdFwiLCBub3RlczpUMX19LFxuICByX3QxX20yOiB7cmVzdWx0Ont0aWVyOlwiVGllciAxIMK3IEludGVybmFsIE9wZXJhdGlvbnNcIiwgY29sb3I6XCIjMDA3M0U2XCIsIG1vZGVsOlwiTTIgwrcgVXNhZ2VcIiwgbm90ZXM6VDF9fSxcbiAgcl9haWRfbTM6e3Jlc3VsdDp7dGllcjpcIkFJLUF1Z21lbnRlZCBEZWxpdmVyeVwiLCBjb2xvcjpcIiM0QUE4MkRcIiwgbW9kZWw6XCJNMyDCtyBUYXNrLUJhc2VkXCIsIG5vdGVzOkFJRCwgYmFkZ2VzOltHQVRFXX19LFxuICByX2FpZF9tMTp7cmVzdWx0Ont0aWVyOlwiQUktQXVnbWVudGVkIERlbGl2ZXJ5XCIsIGNvbG9yOlwiIzRBQTgyRFwiLCBtb2RlbDpcIk0xIMK3IFBlciBTZWF0IChtYW5kYXkgcmF0ZSlcIiwgbm90ZXM6QUlELCBiYWRnZXM6W0dBVEVdfX0sXG4gIHJfYWlkX201OntyZXN1bHQ6e3RpZXI6XCJBSS1BdWdtZW50ZWQgRGVsaXZlcnlcIiwgY29sb3I6XCIjNEFBODJEXCIsIG1vZGVsOlwiTTUgwrcgT3V0Y29tZS1CYXNlZFwiLCBub3RlczpbLi4uQUlELCBcIk91dGNvbWUgbXVzdCBiZSB2ZXJpZmlhYmxlIGFnYWluc3QgdGhlIG9yaWdpbmFsIHByb2plY3QgZXN0aW1hdGUuXCJdLCBiYWRnZXM6W0dBVEVdfX0sXG4gIHJfYWlkX200OntyZXN1bHQ6e3RpZXI6XCJBSS1BdWdtZW50ZWQgRGVsaXZlcnlcIiwgY29sb3I6XCIjNEFBODJEXCIsIG1vZGVsOlwiTTQgwrcgSHlicmlkICgrIE01IG9wdGlvbiBjbGF1c2UpXCIsIG5vdGVzOkFJRCwgYmFkZ2VzOltHQVRFXX19LFxuICByX3QyX200OiB7cmVzdWx0Ont0aWVyOlwiVGllciAyIMK3IFBsYXRmb3JtIFNlcnZpY2VzXCIsIGNvbG9yOlwiIzY2Mzg5NFwiLCBtb2RlbDpcIk00IMK3IEh5YnJpZFwiLCBub3RlczpUMiwgYmFkZ2VzOltDTEFVU0VdfX0sXG4gIHJfdDJfbTI6IHtyZXN1bHQ6e3RpZXI6XCJUaWVyIDIgwrcgUGxhdGZvcm0gU2VydmljZXNcIiwgY29sb3I6XCIjNjYzODk0XCIsIG1vZGVsOlwiTTIgwrcgVXNhZ2VcIiwgbm90ZXM6Wy4uLlQyLCBcIlB1dCBjb25zdW1wdGlvbiBjYXBzIGluIHRoZSBjb250cmFjdCDigJQgZ3VhcmQgYWdhaW5zdCBiaWxsIHNob2NrLlwiXX19LFxuICByX3QyX20zOiB7cmVzdWx0Ont0aWVyOlwiVGllciAyIMK3IFBsYXRmb3JtIFNlcnZpY2VzXCIsIGNvbG9yOlwiIzY2Mzg5NFwiLCBtb2RlbDpcIk0zIMK3IFRhc2stQmFzZWRcIiwgbm90ZXM6Wy4uLlQyLCBcIlNldCB0aGUgdGFzay1wcmljZSBmbG9vciBmcm9tIFA5MCB0b2tlbiBjb3N0LCBub3QgdGhlIG1lYW4uXCJdfX0sXG4gIHJfdDNfbTE6IHtyZXN1bHQ6e3RpZXI6XCJUaWVyIDMgwrcgRGlnaXRhbCBMYWJvdXJcIiwgY29sb3I6XCIjRUY1RTgyXCIsIG1vZGVsOlwiTTEgwrcgUGVyIFNlYXRcIiwgbm90ZXM6Wy4uLlQzLCBcIk5vdCB5ZXQgYXQgZnVsbCBUaWVyIDMgZ2F0ZXMg4oCUIGVudGVyIGhlcmUgYW5kIGJ1aWxkIHRvd2FyZCBNNS5cIl19fSxcbiAgcl90M19tMzoge3Jlc3VsdDp7dGllcjpcIlRpZXIgMyDCtyBEaWdpdGFsIExhYm91clwiLCBjb2xvcjpcIiNFRjVFODJcIiwgbW9kZWw6XCJNMyDCtyBUYXNrLUJhc2VkXCIsIG5vdGVzOlsuLi5UMywgXCJQZXItZGVsaXZlcmFibGUgcHJpY2luZyBidWlsZHMgdGhlIGJhc2VsaW5lIGRhdGEgeW91J2xsIG5lZWQgZm9yIG91dGNvbWVzLlwiXX19LFxuICByX3QzX201OiB7cmVzdWx0Ont0aWVyOlwiVGllciAzIMK3IERpZ2l0YWwgTGFib3VyXCIsIGNvbG9yOlwiI0VGNUU4MlwiLCBtb2RlbDpcIk01IMK3IE91dGNvbWUtQmFzZWRcIiwgbm90ZXM6Wy4uLlQzLCBcIk1hbmRhdG9yeTogRSZPIGluc3VyYW5jZSwgYXVkaXRlZCBiYXNlbGluZSwgMjQtbW9udGggdGVybSwgQ29FIERpcmVjdG9yIGFwcHJvdmFsLlwiXX19LFxuICByX3QzX200OiB7cmVzdWx0Ont0aWVyOlwiVGllciAzIMK3IERpZ2l0YWwgTGFib3VyXCIsIGNvbG9yOlwiI0VGNUU4MlwiLCBtb2RlbDpcIk00IMK3IEh5YnJpZCAoKyBNNSBvcHRpb24gY2xhdXNlKVwiLCBub3RlczpbLi4uVDMsIFwiQXR0cmlidXRpb24gY29udGVzdGVkIOKAlCBmYWxsIGJhY2sgdG8gaHlicmlkIGFuZCBrZWVwIHRoZSBNNSBvcHRpb24gb3Blbi5cIl0sIGJhZGdlczpbQ0xBVVNFXX19LFxufSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNCIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6IntcbiAgY29uc3QgcyA9IGR0X3N0YXRlOyAgICAgICAgICAgICAgICAgICAgICAgIC8vIHJlYWN0aXZlIGRlcGVuZGVuY3kg4oCUIHJlLXJ1bnMgb24gZWFjaCBjbGlja1xuICBjb25zdCB3cmFwID0gaHRtbGA8ZGl2PjwvZGl2PmA7XG5cbiAgLy8gLS0tLSBicmVhZGNydW1iIHRyYWlsIC0tLS1cbiAgY29uc3QgYmMgPSBodG1sYDxkaXYgc3R5bGU9XCJtYXJnaW4tYm90dG9tOi43ZW07XCI+PC9kaXY+YDtcbiAgY29uc3Qgc3RhcnQgPSBodG1sYDxzcGFuIGNsYXNzPVwiZHQtY3J1bWJcIj7ihrsgU3RhcnQgb3Zlcjwvc3Bhbj5gO1xuICBzdGFydC5hZGRFdmVudExpc3RlbmVyKFwiY2xpY2tcIiwgKCkgPT4geyBtdXRhYmxlIGR0X3N0YXRlID0ge2N1cnJlbnQ6XCJzdGFydFwiLCBwYXRoOltdLCByaXNrOnMucmlza307IH0pO1xuICBiYy5hcHBlbmQoc3RhcnQpO1xuICBzLnBhdGguZm9yRWFjaCgocCwgaSkgPT4ge1xuICAgIGNvbnN0IGNyID0gaHRtbGA8c3BhbiBjbGFzcz1cImR0LWNydW1iXCI+JHtwLnRpdGxlfTwvc3Bhbj5gO1xuICAgIGNyLmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7IG11dGFibGUgZHRfc3RhdGUgPSB7Y3VycmVudDpwLm5vZGUsIHBhdGg6cy5wYXRoLnNsaWNlKDAsaSksIHJpc2s6cy5yaXNrfTsgfSk7XG4gICAgYmMuYXBwZW5kKGNyKTtcbiAgfSk7XG4gIHdyYXAuYXBwZW5kKGJjKTtcblxuICBjb25zdCBub2RlID0gVFJFRVtzLmN1cnJlbnRdO1xuXG4gIGlmIChub2RlLnEpIHtcbiAgICB3cmFwLmFwcGVuZChodG1sYDxkaXYgY2xhc3M9XCJkdC1xXCI+JHtub2RlLnF9PC9kaXY+YCk7XG4gICAgbm9kZS5vcHRzLmZvckVhY2gob3B0ID0+IHtcbiAgICAgIGNvbnN0IGMgPSBodG1sYDxkaXYgY2xhc3M9XCJkdC1jYXJkXCI+XG4gICAgICAgIDxkaXYgY2xhc3M9XCJkdC1pY29cIj4ke29wdC5pY29uIHx8IFwiXCJ9PC9kaXY+XG4gICAgICAgIDxkaXY+PGRpdiBjbGFzcz1cImR0LXRcIj4ke29wdC50aXRsZX08L2Rpdj48ZGl2IGNsYXNzPVwiZHQtc1wiPiR7b3B0LnN1YiB8fCBcIlwifTwvZGl2PjwvZGl2PlxuICAgICAgPC9kaXY+YDtcbiAgICAgIGMuYWRkRXZlbnRMaXN0ZW5lcihcImNsaWNrXCIsICgpID0+IHtcbiAgICAgICAgbXV0YWJsZSBkdF9zdGF0ZSA9IHtcbiAgICAgICAgICBjdXJyZW50OiBvcHQubmV4dCxcbiAgICAgICAgICBwYXRoOiBbLi4ucy5wYXRoLCB7bm9kZTogcy5jdXJyZW50LCB0aXRsZTogb3B0LnRpdGxlfV0sXG4gICAgICAgICAgcmlzazogcy5yaXNrXG4gICAgICAgIH07XG4gICAgICB9KTtcbiAgICAgIHdyYXAuYXBwZW5kKGMpO1xuICAgIH0pO1xuXG4gIH0gZWxzZSBpZiAobm9kZS5yZXN1bHQpIHtcbiAgICBjb25zdCByID0gbm9kZS5yZXN1bHQ7XG4gICAgY29uc3QgcGFuZWwgPSBodG1sYDxkaXY+PC9kaXY+YDtcbiAgICBwYW5lbC5zdHlsZS5jc3NUZXh0ID0gXCJib3JkZXItbGVmdDo3cHggc29saWQgXCIrci5jb2xvcitcIjtiYWNrZ3JvdW5kOiNmOGY5ZmI7cGFkZGluZzoxLjFlbSAxLjNlbTtib3JkZXItcmFkaXVzOjlweDtcIjtcblxuICAgIGNvbnN0IHRpZXJFbCA9IGh0bWxgPGRpdj4ke3IudGllcn08L2Rpdj5gO1xuICAgIHRpZXJFbC5zdHlsZS5jc3NUZXh0ID0gXCJmb250LXNpemU6LjhlbTt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjA2ZW07Zm9udC13ZWlnaHQ6NzAwO2NvbG9yOlwiK3IuY29sb3IrXCI7XCI7XG4gICAgY29uc3QgbW9kZWxFbCA9IGh0bWxgPGRpdj4ke3IubW9kZWx9PC9kaXY+YDtcbiAgICBtb2RlbEVsLnN0eWxlLmNzc1RleHQgPSBcImZvbnQtc2l6ZToxLjg1ZW07Zm9udC13ZWlnaHQ6ODAwO21hcmdpbjouMTJlbSAwIC41NWVtO1wiO1xuICAgIHBhbmVsLmFwcGVuZCh0aWVyRWwsIG1vZGVsRWwpO1xuXG4gICAgLy8gcHJvbW90ZWQgZ2F0ZSAvIGNsYXVzZSBib3hlc1xuICAgIChyLmJhZGdlcyB8fCBbXSkuZm9yRWFjaChiZCA9PiB7XG4gICAgICBjb25zdCBib3ggPSBodG1sYDxkaXY+PC9kaXY+YDtcbiAgICAgIGJveC5zdHlsZS5jc3NUZXh0ID0gXCJkaXNwbGF5OmZsZXg7Z2FwOi41NWVtO2FsaWduLWl0ZW1zOmZsZXgtc3RhcnQ7YmFja2dyb3VuZDpcIitiZC5jb2xvcitcIjE0O1wiXG4gICAgICAgICsgXCJib3JkZXI6MXB4IHNvbGlkIFwiK2JkLmNvbG9yK1wiNTU7Ym9yZGVyLWxlZnQ6NXB4IHNvbGlkIFwiK2JkLmNvbG9yK1wiO2JvcmRlci1yYWRpdXM6N3B4O1wiXG4gICAgICAgICsgXCJwYWRkaW5nOi42ZW0gLjhlbTttYXJnaW46LjE1ZW0gMCAuNmVtO1wiO1xuICAgICAgY29uc3QgaWMgPSBodG1sYDxzcGFuPiR7YmQuaWNvbn08L3NwYW4+YDtcbiAgICAgIGljLnN0eWxlLmNzc1RleHQgPSBcImZvbnQtc2l6ZToxLjE1ZW07bGluZS1oZWlnaHQ6MS4zO1wiO1xuICAgICAgY29uc3QgdHggPSBodG1sYDxzcGFuPiR7YmQudGV4dH08L3NwYW4+YDtcbiAgICAgIHR4LnN0eWxlLmNzc1RleHQgPSBcImZvbnQtc2l6ZTouODhlbTtmb250LXdlaWdodDo2MDA7Y29sb3I6IzJhMmEyYTtsaW5lLWhlaWdodDoxLjM1O1wiO1xuICAgICAgYm94LmFwcGVuZChpYywgdHgpO1xuICAgICAgcGFuZWwuYXBwZW5kKGJveCk7XG4gICAgfSk7XG5cbiAgICBjb25zdCBycSA9IGh0bWxgPGRpdiBzdHlsZT1cIm1hcmdpbjouNGVtIDA7XCI+PHN0cm9uZz5SaXNrIGxldmVsOjwvc3Ryb25nPiA8L2Rpdj5gO1xuICAgIFJJU0suZm9yRWFjaChyYiA9PiB7XG4gICAgICBjb25zdCBiID0gaHRtbGA8c3BhbiBjbGFzcz1cInJpc2stYnRuXCI+JHtyYi5sYWJlbH08L3NwYW4+YDtcbiAgICAgIGlmIChzLnJpc2sgPT09IHJiLmtleSkgeyBiLnN0eWxlLmJhY2tncm91bmQgPSByYi5jb2xvcjsgYi5zdHlsZS5jb2xvciA9IFwiI2ZmZlwiOyBiLnN0eWxlLmJvcmRlckNvbG9yID0gXCJ0cmFuc3BhcmVudFwiOyB9XG4gICAgICBiLmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7IG11dGFibGUgZHRfc3RhdGUgPSBPYmplY3QuYXNzaWduKHt9LCBzLCB7cmlzazogcmIua2V5fSk7IH0pO1xuICAgICAgcnEuYXBwZW5kKGIpO1xuICAgIH0pO1xuICAgIHBhbmVsLmFwcGVuZChycSk7XG5cbiAgICBjb25zdCBhcHByID0gUklTSy5maW5kKHggPT4geC5rZXkgPT09IHMucmlzaykuYXBwcm92YWw7XG4gICAgcGFuZWwuYXBwZW5kKGh0bWxgPGRpdiBzdHlsZT1cIm1hcmdpbjouMzVlbSAwIC43ZW07XCI+PHN0cm9uZz5BcHByb3ZhbCBwYXRoOjwvc3Ryb25nPiAke2FwcHJ9PC9kaXY+YCk7XG5cbiAgICBjb25zdCB1bCA9IGh0bWxgPHVsIHN0eWxlPVwibWFyZ2luOjA7cGFkZGluZy1sZWZ0OjEuMmVtO2xpbmUtaGVpZ2h0OjEuNTU7XCI+PC91bD5gO1xuICAgIHIubm90ZXMuZm9yRWFjaChuID0+IHVsLmFwcGVuZChodG1sYDxsaT4ke259PC9saT5gKSk7XG4gICAgcGFuZWwuYXBwZW5kKHVsKTtcblxuICAgIHBhbmVsLmFwcGVuZChodG1sYDxkaXYgc3R5bGU9XCJtYXJnaW4tdG9wOi45NWVtO2ZvbnQtc2l6ZTouOTVlbTtcIj7ihpIgTm93IHByaWNlIGl0IGluIHRoZSA8YSBocmVmPVwiY29tcGFyYXRvci5odG1sXCI+Rml2ZS1Nb2RlbCBDb21wYXJhdG9yPC9hPi48L2Rpdj5gKTtcbiAgICB3cmFwLmFwcGVuZChwYW5lbCk7XG4gIH1cblxuICByZXR1cm4gd3JhcDtcbn1cbiJ9XX0=
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../..";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Agentic AI Pricing Lab · Engineering Academy 2026</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with Quarto + Observable JS</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

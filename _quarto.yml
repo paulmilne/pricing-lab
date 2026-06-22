@@ -1,0 +1,32 @@
+project:
+  type: website
+  output-dir: docs          # GitHub Pages: serve from /docs on the main branch
+
+website:
+  title: "Agentic AI Pricing Lab"
+  description: "Interactive companion to the Engineering Academy lecture on agentic AI pricing."
+  navbar:
+    background: primary
+    left:
+      - href: index.qmd
+        text: Home
+      - href: decision-tree.qmd
+        text: "Model Selector"
+      - href: comparator.qmd
+        text: "Five-Model Comparator"
+      - href: token-distribution.qmd
+        text: "Token Distribution"
+  page-footer:
+    left: "Agentic AI Pricing Lab · Engineering Academy 2026"
+    right: "Built with Quarto + Observable JS"
+
+execute:
+  echo: false          # hide source code — students drive widgets, not read JS
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-title: "On this page"
+    grid:
+      body-width: 1100px

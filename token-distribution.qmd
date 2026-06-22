@@ -1,0 +1,160 @@
+---
+title: "Token Distribution & the P90 Floor"
+subtitle: "Why pricing at the mean quietly loses money"
+filters:
+  - shinylive
+---
+
+Token cost per task is **not a number — it's a long-tailed distribution.** Most runs are
+cheap; a few are wildly expensive. If you set your price off the *mean*, the tail of
+expensive runs eats your margin on a large share of tasks.
+
+This app simulates that. Set the shape of the distribution, then compare two pricing
+strategies — **price off the mean** vs. **price off the P90 floor** (`P90 cost × 1.15`, the
+framework rule) — and watch the Monte-Carlo loss rates.
+
+::: {.callout-note appearance="simple"}
+This module runs **real R in your browser** via WebAssembly, so the first load takes a few
+seconds while the R runtime downloads. After that it's instant and fully offline.
+:::
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 760
+
+library(shiny)
+
+ui <- fluidPage(
+  tags$style(HTML("
+    body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;}
+    .card{border-radius:10px;padding:.8em 1em;color:#fff;}
+    .big{font-size:1.7em;font-weight:800;line-height:1.1;}
+    .lbl{font-size:.78em;text-transform:uppercase;letter-spacing:.05em;opacity:.9;}
+    .row2{display:flex;gap:.8em;margin-top:.4em;}
+    .row2 > div{flex:1;}
+    .hl{background:#f5f7fa;border-left:5px solid #0073E6;padding:.7em 1em;border-radius:8px;
+        font-size:1.02em;margin-top:.6em;}
+  ")),
+  sidebarLayout(
+    sidebarPanel(
+      width = 4,
+      sliderInput("median", "Median tokens per task", 5000, 150000, 40000, step = 1000),
+      sliderInput("cv", "Variability (coefficient of variation)", 0.2, 1.5, 0.7, step = 0.05),
+      helpText("Higher CV = fatter, longer tail of expensive runs."),
+      sliderInput("rate", "Token rate (£ per 1,000 tokens)", 0.05, 2.00, 0.50, step = 0.05),
+      sliderInput("volume", "Tasks per month", 100, 5000, 1000, step = 100),
+      sliderInput("markup", "Margin on the mean-based price (%)", 0, 50, 15, step = 5)
+    ),
+    mainPanel(
+      width = 8,
+      plotOutput("dist", height = "300px"),
+      uiOutput("cards"),
+      uiOutput("headline")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+
+  gbp  <- function(x) paste0("£", formatC(x, format = "f", digits = 2, big.mark = ","))
+  gbp0 <- function(x) paste0("£", formatC(round(x), format = "d", big.mark = ","))
+  pct  <- function(x) paste0(formatC(100 * x, format = "f", digits = 0), "%")
+
+  p <- reactive({
+    mu    <- log(input$median)
+    sigma <- sqrt(log(1 + input$cv^2))
+    muC   <- mu + log(input$rate / 1000)        # cost = tokens/1000 * rate
+    list(
+      muC = muC, sigma = sigma,
+      median = exp(muC),
+      mean   = exp(muC + sigma^2 / 2),
+      p90    = qlnorm(0.90, muC, sigma),
+      p99    = qlnorm(0.99, muC, sigma)
+    )
+  })
+
+  sim <- reactive({
+    pp <- p()
+    set.seed(1)
+    costs     <- rlnorm(20000, pp$muC, pp$sigma)
+    priceMean <- pp$mean * (1 + input$markup / 100)
+    priceP90  <- pp$p90 * 1.15
+    vol <- input$volume
+    month <- function(price) replicate(800, vol * price - sum(rlnorm(vol, pp$muC, pp$sigma)))
+    mM <- month(priceMean); mP <- month(priceP90)
+    list(
+      costs = costs, priceMean = priceMean, priceP90 = priceP90,
+      lossMean = mean(costs > priceMean), lossP90 = mean(costs > priceP90),
+      monthLossMean = mean(mM < 0), monthLossP90 = mean(mP < 0),
+      expMean = mean(mM), expP90 = mean(mP)
+    )
+  })
+
+  output$dist <- renderPlot({
+    pp <- p(); s <- sim()
+    xmax <- pp$p99 * 1.25
+    xs <- seq(0, xmax, length.out = 500)
+    ys <- dlnorm(xs, pp$muC, pp$sigma)
+    par(mar = c(4, 1, 2, 1))
+    plot(xs, ys, type = "n", xlab = "Cost per task (£)", ylab = "",
+         yaxt = "n", bty = "n", xlim = c(0, xmax), main = "Cost-per-task distribution")
+    tail <- xs >= s$priceMean
+    polygon(c(s$priceMean, xs[tail], xmax), c(0, ys[tail], 0), col = "#EF5E8233", border = NA)
+    lines(xs, ys, col = "#0073E6", lwd = 2.5)
+    abline(v = s$priceMean, col = "#C0392B", lwd = 2)
+    abline(v = s$priceP90,  col = "#4AA82D", lwd = 2)
+    abline(v = pp$p90,      col = "#663894", lwd = 1.5, lty = 3)
+    legend("topright", bty = "n", cex = 0.85, lwd = 2,
+           col = c("#C0392B", "#4AA82D", "#663894"),
+           legend = c(paste0("mean price  ", gbp(s$priceMean)),
+                      paste0("P90 floor   ", gbp(s$priceP90)),
+                      paste0("P90 cost    ", gbp(pp$p90))))
+  })
+
+  output$cards <- renderUI({
+    s <- sim()
+    card <- function(title, colour, price, lossTask, lossMonth, expM) {
+      tags$div(class = "card", style = paste0("background:", colour, ";"),
+        tags$div(class = "lbl", title),
+        tags$div(class = "big", gbp(price), tags$span(style="font-size:.5em;font-weight:600;", " / task")),
+        tags$div(style = "margin-top:.4em;font-size:.92em;",
+          tags$div(tags$b(pct(lossTask)), " of tasks cost more than this price"),
+          tags$div(tags$b(pct(lossMonth)), " chance the month ends in loss"),
+          tags$div("Expected monthly margin: ", tags$b(gbp0(expM)))
+        )
+      )
+    }
+    tags$div(class = "row2",
+      card("Priced off the MEAN", "#C0392B", s$priceMean, s$lossMean, s$monthLossMean, s$expMean),
+      card("Priced off the P90 FLOOR", "#4AA82D", s$priceP90, s$lossP90, s$monthLossP90, s$expP90)
+    )
+  })
+
+  output$headline <- renderUI({
+    s <- sim()
+    tags$div(class = "hl",
+      "Price at the mean and ", tags$b(pct(s$lossMean)),
+      " of tasks cost more than you charged. Move to the P90 floor and that drops to ",
+      tags$b(pct(s$lossP90)), " — the long tail is exactly what the floor is protecting against."
+    )
+  })
+}
+
+shinyApp(ui, server)
+```
+
+## What you're seeing
+
+- The **blue curve** is the cost-per-task distribution (log-normal — the standard model for
+  right-skewed token consumption). Crank the **CV** up and watch the tail stretch.
+- The **red line** is the price if you set it off the *mean* cost (plus your markup). The
+  **shaded red area** to its right is every run that costs *more* than that price — pure loss.
+- The **green line** is the **P90 floor** (`P90 cost × 1.15`). Almost the entire distribution
+  sits to its left, so very few runs lose money.
+
+The Monte-Carlo engine simulates 20,000 individual tasks and 800 months on every change.
+Notice that with a realistic CV (0.6–0.8), pricing at the mean leaves you underwater on
+roughly **40% of tasks** — the number from the lecture, now live.
+
+> **Rule of thumb:** the higher the CV, the more the mean lies to you. Above CV ≈ 0.7, set
+> the M5 floor on the P95 monthly cost, not 60–80% of the M4 base.

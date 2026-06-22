@@ -1,0 +1,214 @@
+---
+title: "Model Selector"
+subtitle: "Answer a few questions, get a recommended pricing model"
+---
+
+This walks the same decision tree as the CoE Model Selection Guide. Click your way through —
+each answer reveals the next question, and your recommendation appears at the end. Click any
+crumb in the trail to jump back and explore a different branch.
+
+> Start with the question that organises everything: **who actually operates the AI, and who
+> carries the risk if it goes wrong?**
+
+```{ojs}
+//| label: dt-style
+html`<style>
+  .dt-card{display:flex;gap:.85em;align-items:center;border:1.5px solid #e1e5ec;border-radius:11px;
+    padding:.85em 1.1em;margin:.55em 0;cursor:pointer;background:#fff;transition:all .14s ease;}
+  .dt-card:hover{border-color:#0073E6;box-shadow:0 3px 14px rgba(0,115,230,.16);transform:translateY(-1px);}
+  .dt-ico{font-size:1.7em;line-height:1;}
+  .dt-t{font-weight:700;font-size:1.06em;}
+  .dt-s{color:#6a7180;font-size:.9em;margin-top:.1em;}
+  .dt-q{font-size:1.28em;font-weight:750;margin:.5em 0 .5em;}
+  .dt-crumb{display:inline-flex;align-items:center;background:#eef1f6;border-radius:20px;padding:.22em .8em;
+    margin:.15em .35em .15em 0;font-size:.85em;cursor:pointer;transition:background .12s;}
+  .dt-crumb:hover{background:#dde3ec;}
+  .risk-btn{display:inline-block;border:1.5px solid #e1e5ec;border-radius:8px;padding:.35em .8em;
+    margin:.2em .35em .2em 0;cursor:pointer;font-size:.88em;font-weight:600;transition:all .12s;}
+  .risk-btn:hover{border-color:#9aa3b0;}
+</style>`
+```
+
+```{ojs}
+//| label: dt-state
+// One reactive state object. Every click writes a NEW object here, which re-runs
+// the render cell below and emits a fresh node — the robust Quarto OJS idiom.
+mutable dt_state = ({current: "start", path: [], risk: "med"})
+```
+
+```{ojs}
+//| label: dt-data
+T1  = ["Risk stays inside the org — price for cost recovery (0–20% margin).",
+       "Never under-price: FTE cost × replacement ratio is the floor, not infra cost."]
+AID = ["Price the market rate for the DELIVERABLE — not your reduced cost. The efficiency gain is your margin."]
+T2  = ["Differentiate on vertical compliance depth — not unit price. Hyperscalers win on cost."]
+T3  = ["Hold risk reserves of 10–20% of revenue; open-ended liability lives here."]
+
+RISK = [
+  {key:"low",  label:"Low (1–3)",       color:"#4AA82D", approval:"Self-service / CoE notification"},
+  {key:"med",  label:"Medium (4–6)",    color:"#0073E6", approval:"CoE approval"},
+  {key:"high", label:"High (7–8)",      color:"#E8830C", approval:"Executive approval"},
+  {key:"crit", label:"Critical (9–10)", color:"#C0392B", approval:"Board approval + E&O insurance mandatory"},
+]
+
+// Promoted gate/clause boxes (mirror the AID_GATE and CLAUSE nodes in the document)
+GATE   = ({icon:"✋", color:"#E8830C", text:"MANDATORY QUALITY GATE — a human reviews every AI output before it reaches the customer."})
+CLAUSE = ({icon:"📌", color:"#663894", text:"ADD THE M5 OPTION CLAUSE AT SIGNATURE — agree the metric, baseline, floor and ceiling now, never retrofit at renewal."})
+
+TREE = ({
+  start: {q: "Who operates the AI — and who carries the risk?", opts: [
+    {key:"internal", icon:"🏢", title:"Our internal team", sub:"Employees use it; value and risk stay inside the org", next:"t1obj"},
+    {key:"aid",      icon:"🛠️", title:"We deliver with it",  sub:"Our team uses the AI to produce work for a customer", next:"aidContract"},
+    {key:"external", icon:"🤝", title:"The customer drives it", sub:"The external customer operates the agent themselves", next:"namedRole"},
+  ]},
+  t1obj: {q: "What is the primary objective?", opts: [
+    {key:"fte",   icon:"👥", title:"Replace / reduce headcount", sub:"FTE-benchmarked", next:"r_t1_m1"},
+    {key:"usage", icon:"📊", title:"Recover variable running costs", sub:"Consumption-based", next:"r_t1_m2"},
+  ]},
+  aidContract: {q: "How does the customer pay you?", opts: [
+    {key:"task",    icon:"📦", title:"Fixed price per defined deliverable", next:"r_aid_m3"},
+    {key:"tm",      icon:"⏱️", title:"Time & materials at a professional rate", next:"r_aid_m1"},
+    {key:"outcome", icon:"🎯", title:"On the business outcome achieved", next:"aidGates"},
+  ]},
+  aidGates: {q: "Are ALL outcome gates met?  (L4+ autonomy · audited baseline · attribution independently verifiable)", opts: [
+    {key:"yes", icon:"✅", title:"Yes — every gate is met", next:"r_aid_m5"},
+    {key:"no",  icon:"🚧", title:"Not yet", next:"r_aid_m4"},
+  ]},
+  namedRole: {q: "Does the agent take a named role and exercise judgment for the customer?", opts: [
+    {key:"no",  icon:"🔧", title:"No — a tool under the customer's direction", next:"t2auto"},
+    {key:"yes", icon:"🧑‍💼", title:"Yes — the customer delegates outcomes to it", next:"prod"},
+  ]},
+  prod: {q: "Does it clear the productivity gate — at least 1.2× a human?", opts: [
+    {key:"yes", icon:"🚀", title:"Yes (≥ 1.2×)", next:"t3gates"},
+    {key:"no",  icon:"🐢", title:"No (< 1.2×)", sub:"Stay at Tier 2", next:"t2auto"},
+  ]},
+  t2auto: {q: "Customer maturity & autonomy level?", opts: [
+    {key:"low",  icon:"🔌", title:"L1–L2 · an API or task service", next:"t2charge"},
+    {key:"high", icon:"🔗", title:"L3+ · integration depth is growing", next:"r_t2_m4"},
+  ]},
+  t2charge: {q: "Preferred charging basis?", opts: [
+    {key:"usage", icon:"📊", title:"Volume / token consumption", next:"r_t2_m2"},
+    {key:"task",  icon:"📦", title:"Per task or deliverable", next:"r_t2_m3"},
+  ]},
+  t3gates: {q: "L4+ autonomy AND customer maturity assessed as High?", opts: [
+    {key:"yes", icon:"✅", title:"Yes — all gates met", next:"t3attr"},
+    {key:"no",  icon:"🚧", title:"Not yet", next:"t3entry"},
+  ]},
+  t3entry: {q: "Entry model for Tier 3?", opts: [
+    {key:"seat", icon:"🪑", title:"FTE-benchmarked role pricing", next:"r_t3_m1"},
+    {key:"task", icon:"📦", title:"Per deliverable", next:"r_t3_m3"},
+  ]},
+  t3attr: {q: "Can the outcome be verified by a system neither party controls?", opts: [
+    {key:"yes", icon:"🛰️", title:"Yes — independently verifiable", next:"r_t3_m5"},
+    {key:"no",  icon:"⚖️", title:"No / contested", next:"r_t3_m4"},
+  ]},
+  // ---------- results ----------
+  r_t1_m1: {result:{tier:"Tier 1 · Internal Operations", color:"#0073E6", model:"M1 · Per Seat", notes:T1}},
+  r_t1_m2: {result:{tier:"Tier 1 · Internal Operations", color:"#0073E6", model:"M2 · Usage", notes:T1}},
+  r_aid_m3:{result:{tier:"AI-Augmented Delivery", color:"#4AA82D", model:"M3 · Task-Based", notes:AID, badges:[GATE]}},
+  r_aid_m1:{result:{tier:"AI-Augmented Delivery", color:"#4AA82D", model:"M1 · Per Seat (manday rate)", notes:AID, badges:[GATE]}},
+  r_aid_m5:{result:{tier:"AI-Augmented Delivery", color:"#4AA82D", model:"M5 · Outcome-Based", notes:[...AID, "Outcome must be verifiable against the original project estimate."], badges:[GATE]}},
+  r_aid_m4:{result:{tier:"AI-Augmented Delivery", color:"#4AA82D", model:"M4 · Hybrid (+ M5 option clause)", notes:AID, badges:[GATE]}},
+  r_t2_m4: {result:{tier:"Tier 2 · Platform Services", color:"#663894", model:"M4 · Hybrid", notes:T2, badges:[CLAUSE]}},
+  r_t2_m2: {result:{tier:"Tier 2 · Platform Services", color:"#663894", model:"M2 · Usage", notes:[...T2, "Put consumption caps in the contract — guard against bill shock."]}},
+  r_t2_m3: {result:{tier:"Tier 2 · Platform Services", color:"#663894", model:"M3 · Task-Based", notes:[...T2, "Set the task-price floor from P90 token cost, not the mean."]}},
+  r_t3_m1: {result:{tier:"Tier 3 · Digital Labour", color:"#EF5E82", model:"M1 · Per Seat", notes:[...T3, "Not yet at full Tier 3 gates — enter here and build toward M5."]}},
+  r_t3_m3: {result:{tier:"Tier 3 · Digital Labour", color:"#EF5E82", model:"M3 · Task-Based", notes:[...T3, "Per-deliverable pricing builds the baseline data you'll need for outcomes."]}},
+  r_t3_m5: {result:{tier:"Tier 3 · Digital Labour", color:"#EF5E82", model:"M5 · Outcome-Based", notes:[...T3, "Mandatory: E&O insurance, audited baseline, 24-month term, CoE Director approval."]}},
+  r_t3_m4: {result:{tier:"Tier 3 · Digital Labour", color:"#EF5E82", model:"M4 · Hybrid (+ M5 option clause)", notes:[...T3, "Attribution contested — fall back to hybrid and keep the M5 option open."], badges:[CLAUSE]}},
+})
+```
+
+```{ojs}
+//| label: dt-render
+{
+  const s = dt_state;                        // reactive dependency — re-runs on each click
+  const wrap = html`<div></div>`;
+
+  // ---- breadcrumb trail ----
+  const bc = html`<div style="margin-bottom:.7em;"></div>`;
+  const start = html`<span class="dt-crumb">↻ Start over</span>`;
+  start.addEventListener("click", () => { mutable dt_state = {current:"start", path:[], risk:s.risk}; });
+  bc.append(start);
+  s.path.forEach((p, i) => {
+    const cr = html`<span class="dt-crumb">${p.title}</span>`;
+    cr.addEventListener("click", () => { mutable dt_state = {current:p.node, path:s.path.slice(0,i), risk:s.risk}; });
+    bc.append(cr);
+  });
+  wrap.append(bc);
+
+  const node = TREE[s.current];
+
+  if (node.q) {
+    wrap.append(html`<div class="dt-q">${node.q}</div>`);
+    node.opts.forEach(opt => {
+      const c = html`<div class="dt-card">
+        <div class="dt-ico">${opt.icon || ""}</div>
+        <div><div class="dt-t">${opt.title}</div><div class="dt-s">${opt.sub || ""}</div></div>
+      </div>`;
+      c.addEventListener("click", () => {
+        mutable dt_state = {
+          current: opt.next,
+          path: [...s.path, {node: s.current, title: opt.title}],
+          risk: s.risk
+        };
+      });
+      wrap.append(c);
+    });
+
+  } else if (node.result) {
+    const r = node.result;
+    const panel = html`<div></div>`;
+    panel.style.cssText = "border-left:7px solid "+r.color+";background:#f8f9fb;padding:1.1em 1.3em;border-radius:9px;";
+
+    const tierEl = html`<div>${r.tier}</div>`;
+    tierEl.style.cssText = "font-size:.8em;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:"+r.color+";";
+    const modelEl = html`<div>${r.model}</div>`;
+    modelEl.style.cssText = "font-size:1.85em;font-weight:800;margin:.12em 0 .55em;";
+    panel.append(tierEl, modelEl);
+
+    // promoted gate / clause boxes
+    (r.badges || []).forEach(bd => {
+      const box = html`<div></div>`;
+      box.style.cssText = "display:flex;gap:.55em;align-items:flex-start;background:"+bd.color+"14;"
+        + "border:1px solid "+bd.color+"55;border-left:5px solid "+bd.color+";border-radius:7px;"
+        + "padding:.6em .8em;margin:.15em 0 .6em;";
+      const ic = html`<span>${bd.icon}</span>`;
+      ic.style.cssText = "font-size:1.15em;line-height:1.3;";
+      const tx = html`<span>${bd.text}</span>`;
+      tx.style.cssText = "font-size:.88em;font-weight:600;color:#2a2a2a;line-height:1.35;";
+      box.append(ic, tx);
+      panel.append(box);
+    });
+
+    const rq = html`<div style="margin:.4em 0;"><strong>Risk level:</strong> </div>`;
+    RISK.forEach(rb => {
+      const b = html`<span class="risk-btn">${rb.label}</span>`;
+      if (s.risk === rb.key) { b.style.background = rb.color; b.style.color = "#fff"; b.style.borderColor = "transparent"; }
+      b.addEventListener("click", () => { mutable dt_state = Object.assign({}, s, {risk: rb.key}); });
+      rq.append(b);
+    });
+    panel.append(rq);
+
+    const appr = RISK.find(x => x.key === s.risk).approval;
+    panel.append(html`<div style="margin:.35em 0 .7em;"><strong>Approval path:</strong> ${appr}</div>`);
+
+    const ul = html`<ul style="margin:0;padding-left:1.2em;line-height:1.55;"></ul>`;
+    r.notes.forEach(n => ul.append(html`<li>${n}</li>`));
+    panel.append(ul);
+
+    panel.append(html`<div style="margin-top:.95em;font-size:.95em;">→ Now price it in the <a href="comparator.html">Five-Model Comparator</a>.</div>`);
+    wrap.append(panel);
+  }
+
+  return wrap;
+}
+```
+
+::: {.callout-warning collapse="true"}
+## This is guidance, not gospel
+The tree encodes the default path for each situation. Real deals have nuance — a strong
+attribution story can pull a borderline case up a tier; a nervous customer can pull it down.
+Use the recommendation as the starting position for the commercial conversation, then apply
+the full CoE pre-qualification (P1–P8) before committing to M5.
+:::

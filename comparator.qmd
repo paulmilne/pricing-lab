@@ -1,0 +1,176 @@
+---
+title: "The Five-Model Comparator"
+subtitle: "One engagement, priced five ways"
+---
+
+Pick a single engagement below — how many people it replaces, how much work it does, how
+much value it creates — then watch what the customer pays each month under **all five
+pricing models at once**. Nothing about the *product* changes between the bars. Only the
+**commercial model** changes.
+
+The dashed line is what the customer pays for the **humans today**. Anything below it is a
+saving you can share; anything above it needs a very good value story.
+
+## Set up the engagement
+
+```{ojs}
+//| label: primary-inputs
+viewof fteCost   = Inputs.range([30000, 120000], {value: 60000, step: 1000, label: "Human FTE cost (£/yr, fully loaded)"})
+viewof fteCount  = Inputs.range([1, 20],          {value: 3,     step: 1,    label: "FTEs replaced / augmented"})
+viewof volume    = Inputs.range([100, 10000],     {value: 1000,  step: 100,  label: "Tasks delivered per month"})
+viewof aiCost    = Inputs.range([0.1, 10],        {value: 2,     step: 0.1,  label: "AI cost to serve one task (£)"})
+viewof value     = Inputs.range([5000, 500000],   {value: 50000, step: 5000, label: "Business value created per month (£)"})
+viewof riskScore = Inputs.range([1, 10],          {value: 5,     step: 1,    label: "Risk score (1–10)"})
+viewof autonomy  = Inputs.select(["L1", "L2", "L3", "L4", "L5"], {value: "L3", label: "Autonomy level"})
+```
+
+::: {.callout-note collapse="true" title="Fine-tune each model (optional)"}
+
+```{ojs}
+//| label: model-assumptions
+viewof seatDiscount = Inputs.range([0.4, 0.7],   {value: 0.5,  step: 0.05, label: "M1 · seat discount vs human rate"})
+viewof m2Margin     = Inputs.range([0.30, 0.50], {value: 0.40, step: 0.01, label: "M2 · target margin"})
+viewof m2BaseFee    = Inputs.range([0, 5000],    {value: 500,  step: 100,  label: "M2 · monthly base fee (£)"})
+viewof m3Markup     = Inputs.range([0.30, 1.50], {value: 0.60, step: 0.05, label: "M3 · task markup vs cost"})
+viewof m4BaseFee    = Inputs.range([0, 30000],   {value: 8000, step: 500,  label: "M4 · base platform fee (£/mo)"})
+viewof m4Share      = Inputs.range([0.01, 0.03], {value: 0.02, step: 0.005,label: "M4 · value share"})
+viewof m5Share      = Inputs.range([0.02, 0.05], {value: 0.03, step: 0.005,label: "M5 · value share"})
+viewof ceilMult     = Inputs.range([3, 5],       {value: 4,    step: 0.5,  label: "M5 · ceiling (× floor)"})
+```
+
+:::
+
+```{ojs}
+//| label: engine
+//| echo: false
+
+// ---- risk & autonomy overlay (applied on top of every input-based model) ----
+riskPremium = (score) => {
+  const pts = [[1, 0.05], [3, 0.10], [6, 0.20], [8, 0.40], [10, 1.00]];
+  if (score <= 1) return 0.05;
+  if (score >= 10) return 1.00;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [x0, y0] = pts[i], [x1, y1] = pts[i + 1];
+    if (score >= x0 && score <= x1) return y0 + (y1 - y0) * (score - x0) / (x1 - x0);
+  }
+}
+autonomyMod = (lvl) => (lvl === "L4" ? 1.20 : lvl === "L5" ? 1.40 : 1.00);
+overlay = (base) => base * (1 + riskPremium(riskScore)) * autonomyMod(autonomy);
+
+humanMonthly = fteCount * fteCost / 12;
+
+prices = {
+  const m1 = overlay(fteCount * (fteCost / 12) * seatDiscount);
+  const m2 = overlay(m2BaseFee + volume * (aiCost * (1 + m2Margin)));
+  const m3 = overlay(volume * (aiCost * (1 + m3Markup)));
+  const m4 = overlay(m4BaseFee + value * m4Share);
+
+  // M5 has its own floor/ceiling guardrails rather than the overlay
+  const m4BaseOverlaid = overlay(m4BaseFee);
+  const floor   = 0.8 * m4BaseOverlaid;
+  const ceiling = ceilMult * floor;
+  const m5raw   = value * m5Share;
+  const m5      = Math.max(floor, Math.min(ceiling, m5raw));
+  const m5bind  = m5raw <= floor ? "floor binds" : m5raw >= ceiling ? "ceiling binds" : "share applies";
+
+  return [
+    {model: "M1 Per Seat", price: m1, note: `${(seatDiscount*100).toFixed(0)}% of human rate`},
+    {model: "M2 Usage",    price: m2, note: `${volume.toLocaleString()} tasks × unit price`},
+    {model: "M3 Task",     price: m3, note: `${volume.toLocaleString()} tasks × task price`},
+    {model: "M4 Hybrid",   price: m4, note: `base + ${(m4Share*100).toFixed(1)}% of value`},
+    {model: "M5 Outcome",  price: m5, note: m5bind},
+  ];
+}
+
+gbp = (x) => "£" + Math.round(x).toLocaleString("en-GB");
+palette = ["#3DC7FF", "#0073E6", "#663894", "#AA4B8B", "#EF5E82"];
+```
+
+## What the customer pays each month
+
+```{ojs}
+//| label: chart
+//| echo: false
+Plot.plot({
+  marginLeft: 70,
+  marginBottom: 40,
+  height: 380,
+  x: {label: null, domain: prices.map(d => d.model)},
+  y: {label: "↑ Monthly price to customer (£)", grid: true,
+      tickFormat: (s) => "£" + (s / 1000) + "k"},
+  color: {domain: prices.map(d => d.model), range: palette},
+  marks: [
+    Plot.barY(prices, {x: "model", y: "price", fill: "model",
+      tip: {format: {y: gbp, fill: false}}}),
+    Plot.text(prices, {x: "model", y: "price", text: (d) => gbp(d.price),
+      dy: -8, fontWeight: "bold"}),
+    Plot.ruleY([humanMonthly], {stroke: "#00005C", strokeWidth: 2, strokeDasharray: "5 4"}),
+    Plot.text([`Human cost today  ·  ${gbp(humanMonthly)}/mo`],
+      {frameAnchor: "top-right", dx: -6, dy: 8, fill: "#00005C", fontWeight: "bold"}),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+```{ojs}
+//| label: insight
+//| echo: false
+{
+  const ps = prices.map(d => d.price);
+  const lo = Math.min(...ps), hi = Math.max(...ps);
+  const loModel = prices.find(d => d.price === lo).model;
+  const hiModel = prices.find(d => d.price === hi).model;
+  return html`<div class="callout callout-style-default callout-tip">
+    <div class="callout-body" style="padding:0.8em 1em;">
+      <strong>Same engagement, ${(hi / lo).toFixed(1)}× price spread.</strong>
+      From <strong>${gbp(lo)}/mo</strong> (${loModel}) to <strong>${gbp(hi)}/mo</strong> (${hiModel})
+      — changing nothing but the pricing model. Annualised, that is
+      ${gbp(lo * 12)} vs ${gbp(hi * 12)}.
+    </div></div>`;
+}
+```
+
+## The detail
+
+```{ojs}
+//| label: table
+//| echo: false
+Inputs.table(prices.map(d => ({
+  Model: d.model,
+  "Monthly (£)": gbp(d.price),
+  "Annual (£)": gbp(d.price * 12),
+  "vs human": (d.price / humanMonthly * 100).toFixed(0) + "%",
+  Basis: d.note
+})), {rows: 6, layout: "auto"})
+```
+
+## How each bar is calculated
+
+The risk and autonomy settings apply on top of the four input-based models as a single
+overlay — this is the framework's "apply the premium *on top of* the model price" rule:
+
+$$\text{overlay}(x) = x \times \big(1 + \text{risk premium}\big) \times \text{autonomy modifier}$$
+
+where the risk premium runs from +5% (score 1) to +100% (score 10), and the autonomy
+modifier is ×1.00 up to L3, **×1.20 at L4**, and **×1.40 at L5**.
+
+| Model | Monthly price (before overlay) |
+|---|---|
+| **M1 Per Seat** | $\text{FTEs} \times \dfrac{\text{FTE cost}}{12} \times \text{seat discount}$ |
+| **M2 Usage** | $\text{base fee} + \text{volume} \times \big(\text{AI cost} \times (1 + \text{margin})\big)$ |
+| **M3 Task** | $\text{volume} \times \big(\text{AI cost} \times (1 + \text{markup})\big)$ |
+| **M4 Hybrid** | $\text{base fee} + \text{value} \times \text{share \%}$ |
+| **M5 Outcome** | $\max\big(\text{floor},\ \min(\text{ceiling},\ \text{value} \times \text{share \%})\big)$ |
+
+M5 uses guardrails instead of the overlay: the **floor** is 80% of the (overlaid) M4 base
+fee — protecting your cost recovery — and the **ceiling** is a multiple of that floor,
+capping the customer's exposure. Push the *business value* slider up and watch M5 climb off
+its floor, then slam into its ceiling: that is the whole story of outcome-based pricing in
+one slider.
+
+::: {.callout-warning collapse="true"}
+## These numbers are illustrative
+The constants here are chosen to teach the shape of each model, not to quote a deal. Real
+engagements need the CoE templates, an audited baseline, and the token-distribution work
+from the next module.
+:::
