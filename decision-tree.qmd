@@ -43,6 +43,11 @@ T1  = ["Risk stays inside the org — price for cost recovery (0–20% margin)."
 AID = ["Price the market rate for the DELIVERABLE — not your reduced cost. The efficiency gain is your margin."]
 T2  = ["Differentiate on vertical compliance depth — not unit price. Hyperscalers win on cost."]
 T3  = ["Hold risk reserves of 10–20% of revenue; open-ended liability lives here."]
+// AID's guidance folds into Tier 3 below — direct billable delivery (dev agents
+// per PR, hourly virtual assistants, outcome-based delivery) is exactly the
+// Tier 3 (Digital Labor) use case per the CoE reference doc §3.4/§5.4, not a
+// separate 4th tier.
+T3_AID = [...T3, ...AID]
 
 RISK = [
   {key:"low",  label:"Low (1–3)",       color:"#4AA82D", approval:"Self-service / CoE notification"},
@@ -58,8 +63,13 @@ CLAUSE = ({icon:"📌", color:"#663894", text:"ADD THE M5 OPTION CLAUSE AT SIGNA
 TREE = ({
   start: {q: "Who operates the AI — and who carries the risk?", opts: [
     {key:"internal", icon:"🏢", title:"Our internal team", sub:"Employees use it; value and risk stay inside the org", next:"t1obj"},
-    {key:"aid",      icon:"🛠️", title:"We deliver with it",  sub:"Our team uses the AI to produce work for a customer", next:"aidContract"},
+    {key:"aid",      icon:"🛠️", title:"We deliver with it",  sub:"Our team uses the AI somewhere in producing work for a customer", next:"aidSplit"},
     {key:"external", icon:"🤝", title:"The customer drives it", sub:"The external customer operates the agent themselves", next:"namedRole"},
+  ]},
+  aidSplit: {q: "How does the AI actually show up in the engagement?", opts: [
+    {key:"internal",  icon:"🧑‍💻", title:"Internal productivity tool", sub:"e.g. an AI coding assistant — the customer still just buys our normal service", next:"t1obj"},
+    {key:"platform",  icon:"🧩",  title:"We host a platform for the customer's own agents", sub:"They deploy task-based agents on infrastructure we manage", next:"t2auto"},
+    {key:"labor",     icon:"🤖",  title:"Our agents directly do the billable work", sub:"Priced like digital labor — per PR, hourly, or on the outcome", next:"aidContract"},
   ]},
   t1obj: {q: "What is the primary objective?", opts: [
     {key:"fte",   icon:"👥", title:"Replace / reduce headcount", sub:"FTE-benchmarked", next:"r_t1_m1"},
@@ -105,10 +115,10 @@ TREE = ({
   // ---------- results ----------
   r_t1_m1: {result:{tier:"Tier 1 · Internal Operations", color:"#0073E6", model:"M1 · Per Seat", notes:T1}},
   r_t1_m2: {result:{tier:"Tier 1 · Internal Operations", color:"#0073E6", model:"M2 · Usage", notes:T1}},
-  r_aid_m3:{result:{tier:"AI-Augmented Delivery", color:"#4AA82D", model:"M3 · Task-Based", notes:AID, badges:[GATE]}},
-  r_aid_m1:{result:{tier:"AI-Augmented Delivery", color:"#4AA82D", model:"M1 · Per Seat (manday rate)", notes:AID, badges:[GATE]}},
-  r_aid_m5:{result:{tier:"AI-Augmented Delivery", color:"#4AA82D", model:"M5 · Outcome-Based", notes:[...AID, "Outcome must be verifiable against the original project estimate."], badges:[GATE]}},
-  r_aid_m4:{result:{tier:"AI-Augmented Delivery", color:"#4AA82D", model:"M4 · Hybrid (+ M5 option clause)", notes:AID, badges:[GATE]}},
+  r_aid_m3:{result:{tier:"Tier 3 · Digital Labour", color:"#EF5E82", model:"M3 · Task-Based", notes:T3_AID, badges:[GATE]}},
+  r_aid_m1:{result:{tier:"Tier 3 · Digital Labour", color:"#EF5E82", model:"M1 · Per Seat (manday rate)", notes:T3_AID, badges:[GATE]}},
+  r_aid_m5:{result:{tier:"Tier 3 · Digital Labour", color:"#EF5E82", model:"M5 · Outcome-Based", notes:[...T3_AID, "Outcome must be verifiable against the original project estimate."], badges:[GATE]}},
+  r_aid_m4:{result:{tier:"Tier 3 · Digital Labour", color:"#EF5E82", model:"M4 · Hybrid (+ M5 option clause)", notes:T3_AID, badges:[GATE, CLAUSE]}},
   r_t2_m4: {result:{tier:"Tier 2 · Platform Services", color:"#663894", model:"M4 · Hybrid", notes:T2, badges:[CLAUSE]}},
   r_t2_m2: {result:{tier:"Tier 2 · Platform Services", color:"#663894", model:"M2 · Usage", notes:[...T2, "Put consumption caps in the contract — guard against bill shock."]}},
   r_t2_m3: {result:{tier:"Tier 2 · Platform Services", color:"#663894", model:"M3 · Task-Based", notes:[...T2, "Set the task-price floor from P90 token cost, not the mean."]}},
