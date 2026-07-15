@@ -60,7 +60,7 @@
     "href": "index.html#a-reminder-on-the-five-models",
     "title": "Agentic AI Pricing Lab",
     "section": "A reminder on the five models",
-    "text": "A reminder on the five models\n\n\n\n\n\n\n\n\nModel\nCharging basis\nRisk / reward\n\n\n\n\nM1 · Per Seat\nPer agent “seat”, benchmarked to a human FTE\nLow / Low\n\n\nM2 · Usage\nPer token, call, or transaction\nLow / Low\n\n\nM3 · Task\nPer completed unit of work\nLow / Medium\n\n\nM4 · Hybrid\nBase platform fee + a usage or outcome layer\nLow / Medium–High\n\n\nM5 · Outcome\nA share of the value delivered\nMedium–High / Very High\n\n\n\n\nThe numbers in these tools are illustrative — calibrated to teach the shape of each model, not to quote a real deal. For live engagements, use the CoE pricing templates."
+    "text": "A reminder on the five models\n\n\n\n\n\n\n\n\nModel\nCharging basis\nRisk / reward\n\n\n\n\nM1 · Per Seat\nPer agent “seat”, benchmarked to a human FTE\nLow / Low\n\n\nM2 · Usage\nPer token, call, or transaction\nLow / Low\n\n\nM3 · Task\nPer completed unit of work\nLow / Medium\n\n\nM4 · Hybrid\nBase platform fee + a usage or outcome layer\nLow / Medium–High\n\n\nM5 · Outcome\nA share of the value delivered\nMedium–High / Very High\n\n\n\n\nThe numbers in these tools are illustrative — calibrated to teach the shape of each model, not to quote a real deal. For live engagements, use the CoE pricing templates.\n\n\nVersion 1.1.0 · Last updated 15 Jul 2026"
   },
   {
     "objectID": "outcome-designer.html",
