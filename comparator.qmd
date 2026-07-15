@@ -128,10 +128,14 @@ much of that the vendor actually gets to keep.
 //| echo: false
 Plot.plot({
   marginLeft: 70,
+  marginTop: 30,
   marginBottom: 40,
   height: 380,
   x: {label: null, domain: prices.map(d => d.model)},
   y: {label: "↑ Monthly price to customer (£)", grid: true,
+      // Headroom above the tallest bar so the price/margin labels above it
+      // don't get clipped by the plot frame.
+      domain: [0, Math.max(...prices.map(d => d.price)) * 1.22],
       tickFormat: (s) => "£" + (s / 1000) + "k"},
   color: {domain: ["Vendor cost", "Profit"], range: costProfitPalette, legend: true},
   marks: [
