@@ -191,8 +191,8 @@ ui &lt;- fluidPage(
     sidebarPanel(
       width = 4,
       sliderInput("median", "Median tokens per task", 5000, 150000, 40000, step = 1000),
-      sliderInput("cv", "Variability (coefficient of variation)", 0.2, 1.5, 0.7, step = 0.05),
-      helpText("Higher CV = fatter, longer tail of expensive runs."),
+      sliderInput("cv", "Variability (Coefficient of Variation, CoV)", 0.2, 1.5, 0.7, step = 0.05),
+      helpText("Higher CoV = fatter, longer tail of expensive runs."),
       sliderInput("rate", "Token rate (£ per 1,000 tokens)", 0.05, 2.00, 0.50, step = 0.05),
       sliderInput("volume", "Tasks per month", 100, 5000, 1000, step = 100),
       sliderInput("markup", "Margin on the mean-based price (%)", 0, 50, 15, step = 5)
@@ -295,14 +295,15 @@ server &lt;- function(input, output, session) {
 shinyApp(ui, server)</code></pre>
 <section id="what-youre-seeing" class="level2">
 <h2 class="anchored" data-anchor-id="what-youre-seeing">What you’re seeing</h2>
+<p>The <strong>Coefficient of Variation (CoV)</strong> is the standard deviation of cost-per-task divided by its mean — a unitless measure of how spread out costs are <em>relative to</em> their average. It arises here because agentic token consumption is inherently uneven: most tasks resolve in a short, cheap call, but some spiral into long tool-use chains, retries, or context-heavy prompts that cost many times more. A CoV near 0 would mean every task costs about the same (the mean is a safe price); realistic agentic workloads sit around <strong>0.6–0.8</strong>, wide enough that a meaningful share of tasks blow straight through a mean-based price.</p>
 <ul>
-<li>The <strong>blue curve</strong> is the cost-per-task distribution (log-normal — the standard model for right-skewed token consumption). Crank the <strong>CV</strong> up and watch the tail stretch.</li>
+<li>The <strong>blue curve</strong> is the cost-per-task distribution (log-normal — the standard model for right-skewed token consumption). Crank the <strong>CoV</strong> up and watch the tail stretch.</li>
 <li>The <strong>red line</strong> is the price if you set it off the <em>mean</em> cost (plus your markup). The <strong>shaded red area</strong> to its right is every run that costs <em>more</em> than that price — pure loss.</li>
 <li>The <strong>green line</strong> is the <strong>P90 floor</strong> (<code>P90 cost × 1.15</code>). Almost the entire distribution sits to its left, so very few runs lose money.</li>
 </ul>
-<p>The Monte-Carlo engine simulates 20,000 individual tasks and 800 months on every change. Notice that with a realistic CV (0.6–0.8), pricing at the mean leaves you underwater on roughly <strong>40% of tasks</strong> — the number from the lecture, now live.</p>
+<p>The Monte-Carlo engine simulates 20,000 individual tasks and 800 months on every change. Notice that with a realistic CoV (0.6–0.8), pricing at the mean leaves you underwater on roughly <strong>40% of tasks</strong> — the number from the lecture, now live.</p>
 <blockquote class="blockquote">
-<p><strong>Rule of thumb:</strong> the higher the CV, the more the mean lies to you. Above CV ≈ 0.7, set the M5 floor on the P95 monthly cost, not 60–80% of the M4 base.</p>
+<p><strong>Rule of thumb:</strong> the higher the CoV, the more the mean lies to you. Above CoV ≈ 0.7, set the M5 floor on the P95 monthly cost, not 60–80% of the M4 base.</p>
 </blockquote>
 
 
