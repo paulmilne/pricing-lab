@@ -3,6 +3,18 @@ title: "M5 Outcome Designer"
 subtitle: "Design a value-share that survives scale"
 ---
 
+```{=html}
+<style>
+/* Observable Inputs hardcodes label width at 120px via --label-width, which
+   wraps our slider labels onto multiple lines. Widen it and let the input
+   column shrink a bit to compensate. (Same fix as comparator.qmd.) */
+[class^="inputs-"] {
+  --label-width: 340px !important;
+  --input-width: 220px !important;
+}
+</style>
+```
+
 An M5 fee is never simply "a percent of value." It's a **clamped** — and ideally
 **tiered** — function:
 
