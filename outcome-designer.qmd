@@ -7,8 +7,10 @@ subtitle: "Design a value-share that survives scale"
 <style>
 /* Observable Inputs hardcodes label width at 120px via --label-width, which
    wraps our slider labels onto multiple lines. Widen it and let the input
-   column shrink a bit to compensate. (Same fix as comparator.qmd.) */
-[class^="inputs-"] {
+   column shrink a bit to compensate. (Same fix as comparator.qmd.)
+   NB: Quarto vendors Inputs with class prefix "oi-", not the upstream
+   "inputs-" — that was the bug in the first attempt at this fix. */
+[class^="oi-"] {
   --label-width: 340px !important;
   --input-width: 220px !important;
 }

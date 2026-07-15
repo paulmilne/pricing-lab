@@ -7,8 +7,10 @@ subtitle: "One engagement, priced five ways"
 <style>
 /* Observable Inputs hardcodes label width at 120px via --label-width, which
    wraps our longer slider labels onto multiple lines. Widen it and let the
-   input column shrink a bit to compensate. */
-[class^="inputs-"] {
+   input column shrink a bit to compensate.
+   NB: Quarto vendors Inputs with class prefix "oi-", not the upstream
+   "inputs-" — that was the bug in the first attempt at this fix. */
+[class^="oi-"] {
   --label-width: 340px !important;
   --input-width: 220px !important;
 }
