@@ -43,8 +43,11 @@ viewof m2Tier    = Inputs.radio(
 
 ::: {.callout-note collapse="true" title="Fine-tune each model (optional)"}
 
+**Cost-plus inputs** — the raw cost components and cost-recovery margins that build up
+each model's base price:
+
 ```{ojs}
-//| label: model-assumptions
+//| label: cost-inputs
 viewof seatDiscount = Inputs.range([0.4, 0.7],   {value: 0.5,  step: 0.05, label: "M1 · seat discount vs human rate"})
 
 // M2 · Tier 1 cost-recovery breakdown (CoE reference doc):
@@ -52,7 +55,6 @@ viewof seatDiscount = Inputs.range([0.4, 0.7],   {value: 0.5,  step: 0.05, label
 viewof m2Infra      = Inputs.range([200, 5000],  {value: 1200, step: 100,  label: "M2 · infrastructure cost (£/mo — compute + storage + network)"})
 viewof m2License     = Inputs.range([100, 5000], {value: 900,  step: 100,  label: "M2 · license cost (£/mo — vendor fees per agent/API call)"})
 viewof m2Support    = Inputs.range([200, 5000],  {value: 1500, step: 100,  label: "M2 · support cost (£/mo — CoE FTE allocation)"})
-viewof m2RiskRate   = Inputs.range([0.05, 0.10], {value: 0.07, step: 0.01, label: "M2 · risk reserve (% of cost, 5–10%)"})
 viewof m2CoEOverhead = Inputs.range([100, 3000], {value: 600,  step: 100,  label: "M2 · CoE overhead (£/mo — governance, training, monitoring)"})
 viewof m2Margin     = Inputs.range([0, 0.20],    {value: 0.15, step: 0.01, label: "M2 · margin (0–20%, cost recovery)"})
 
@@ -61,15 +63,29 @@ viewof m2Margin     = Inputs.range([0, 0.20],    {value: 0.15, step: 0.01, label
 viewof m2UnitCost   = Inputs.range([0.01, 2],    {value: 0.10, step: 0.01, label: "M2 T2 · unit cost (£/call — infra + license)"})
 viewof m2AllocOverhead = Inputs.range([0.01, 1], {value: 0.05, step: 0.01, label: "M2 T2 · allocated overhead (£/call — support+CoE+sales+marketing ÷ expected volume)"})
 viewof m2T2Margin   = Inputs.range([0.30, 0.50], {value: 0.40, step: 0.01, label: "M2 T2 · target margin (30–50%)"})
-viewof m2T2RiskPrem = Inputs.range([0.00, 0.20], {value: 0.01, step: 0.01, label: "M2 T2 · risk premium (£/call)"})
 viewof m3Hours      = Inputs.range([0.1, 8],     {value: 1,    step: 0.1,  label: "M3 · estimated hours per task"})
 viewof m3Rate       = Inputs.range([15, 100],    {value: 40,   step: 5,    label: "M3 · hourly rate (£/hr)"})
 viewof m3Complexity = Inputs.range([1.0, 2.0],   {value: 1.2,  step: 0.1,  label: "M3 · complexity multiplier"})
-viewof m3RiskPrem   = Inputs.range([1, 50],       {value: 10,   step: 1,    label: "M3 · risk premium per task (£)"})
 viewof m4BaseFee    = Inputs.range([0, 30000],   {value: 8000, step: 500,  label: "M4 · base platform fee (£/mo)"})
-viewof m4Share      = Inputs.range([0.01, 0.03], {value: 0.02, step: 0.005,label: "M4 · value share"})
-viewof m5Share      = Inputs.range([0.02, 0.05], {value: 0.03, step: 0.005,label: "M5 · value share"})
-viewof ceilMult     = Inputs.range([3, 5],       {value: 4,    step: 0.5,  label: "M5 · ceiling (× floor)"})
+```
+
+**Value inputs** — the levers that tie price to the business value delivered:
+
+```{ojs}
+//| label: value-inputs
+viewof m4Share  = Inputs.range([0.01, 0.03], {value: 0.02, step: 0.005, label: "M4 · value share"})
+viewof m5Share  = Inputs.range([0.02, 0.05], {value: 0.03, step: 0.005, label: "M5 · value share"})
+viewof ceilMult = Inputs.range([3, 5],       {value: 4,    step: 0.5,   label: "M5 · ceiling (× floor)"})
+```
+
+**Risk inputs** — the per-model risk loadings (separate from the generic risk/autonomy
+overlay applied to M1, M2 Tier 1, and M4):
+
+```{ojs}
+//| label: risk-inputs
+viewof m2RiskRate   = Inputs.range([0.05, 0.10], {value: 0.07, step: 0.01, label: "M2 T1 · risk reserve (% of cost, 5–10%)"})
+viewof m2T2RiskPrem = Inputs.range([0.00, 0.20], {value: 0.01, step: 0.01, label: "M2 T2 · risk premium (£/call)"})
+viewof m3RiskPrem   = Inputs.range([1, 50],      {value: 10,   step: 1,    label: "M3 · risk premium per task (£)"})
 ```
 
 :::
