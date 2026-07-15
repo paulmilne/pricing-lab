@@ -59,6 +59,12 @@ overlay = (base) => base * (1 + riskPremium(riskScore)) * autonomyMod(autonomy);
 
 humanMonthly = fteCount * fteCost / 12;
 
+// The AI cost to serve is the only real "cost of goods" here — the same
+// product runs underneath every bar, so the vendor's cost to deliver it does
+// not change with the commercial model chosen. (Any base/platform fee is
+// assumed to just cover its own overhead, so it nets out of profit below.)
+vendorCost = aiCost * volume;
+
 prices = {
   const m1 = overlay(fteCount * (fteCost / 12) * seatDiscount);
   const m2 = overlay(m2BaseFee + volume * (aiCost / (1 - m2Margin)));
@@ -73,20 +79,39 @@ prices = {
   const m5      = Math.max(floor, Math.min(ceiling, m5raw));
   const m5bind  = m5raw <= floor ? "floor binds" : m5raw >= ceiling ? "ceiling binds" : "share applies";
 
+  const withProfit = (model, price, note) => ({
+    model, price, note,
+    cost: vendorCost,
+    profit: price - vendorCost,
+    marginPct: price > 0 ? (price - vendorCost) / price : 0,
+  });
+
   return [
-    {model: "M1 Per Seat", price: m1, note: `${(seatDiscount*100).toFixed(0)}% of human rate`},
-    {model: "M2 Usage",    price: m2, note: `${volume.toLocaleString()} tasks × unit price`},
-    {model: "M3 Task",     price: m3, note: `${volume.toLocaleString()} tasks × task price`},
-    {model: "M4 Hybrid",   price: m4, note: `base + ${(m4Share*100).toFixed(1)}% of value`},
-    {model: "M5 Outcome",  price: m5, note: m5bind},
+    withProfit("M1 Per Seat", m1, `${(seatDiscount*100).toFixed(0)}% of human rate`),
+    withProfit("M2 Usage",    m2, `${volume.toLocaleString()} tasks × unit price`),
+    withProfit("M3 Task",     m3, `${volume.toLocaleString()} tasks × task price`),
+    withProfit("M4 Hybrid",   m4, `base + ${(m4Share*100).toFixed(1)}% of value`),
+    withProfit("M5 Outcome",  m5, m5bind),
   ];
 }
 
+// Long-format cost/profit split for the stacked bar — each model's bar is
+// drawn as vendor cost (bottom) + profit (top), summing back to its price.
+segments = prices.flatMap(d => [
+  {model: d.model, segment: "Vendor cost", y1: 0, y2: Math.min(d.cost, d.price)},
+  {model: d.model, segment: "Profit",      y1: Math.min(d.cost, d.price), y2: d.price},
+]);
+
 gbp = (x) => "£" + Math.round(x).toLocaleString("en-GB");
 palette = ["#3DC7FF", "#0073E6", "#663894", "#AA4B8B", "#EF5E82"];
+costProfitPalette = ["#9AA5B1", "#1B998B"];
 ```
 
-## What the customer pays each month
+## What the customer pays each month — and what the vendor keeps
+
+Each bar is now split into the **vendor's cost to serve** (grey) and the **profit** that
+falls out (teal). The total bar height is still what the customer pays; the split shows how
+much of that the vendor actually gets to keep.
 
 ```{ojs}
 //| label: chart
@@ -98,12 +123,16 @@ Plot.plot({
   x: {label: null, domain: prices.map(d => d.model)},
   y: {label: "↑ Monthly price to customer (£)", grid: true,
       tickFormat: (s) => "£" + (s / 1000) + "k"},
-  color: {domain: prices.map(d => d.model), range: palette},
+  color: {domain: ["Vendor cost", "Profit"], range: costProfitPalette, legend: true},
   marks: [
-    Plot.barY(prices, {x: "model", y: "price", fill: "model",
-      tip: {format: {y: gbp, fill: false}}}),
+    Plot.barY(segments, {x: "model", y1: "y1", y2: "y2", fill: "segment",
+      tip: {format: {y1: false, y2: false, fill: false},
+            channels: {"£/mo": (d) => gbp(d.y2 - d.y1)}}}),
     Plot.text(prices, {x: "model", y: "price", text: (d) => gbp(d.price),
       dy: -8, fontWeight: "bold"}),
+    Plot.text(prices, {x: "model", y: "price",
+      text: (d) => `${(d.marginPct * 100).toFixed(0)}% margin`,
+      dy: -22, fontSize: 11, fill: "#555"}),
     Plot.ruleY([humanMonthly], {stroke: "#00005C", strokeWidth: 2, strokeDasharray: "5 4"}),
     Plot.text([`Human cost today  ·  ${gbp(humanMonthly)}/mo`],
       {frameAnchor: "top-right", dx: -6, dy: 8, fill: "#00005C", fontWeight: "bold"}),
@@ -111,6 +140,15 @@ Plot.plot({
   ]
 })
 ```
+
+::: {.callout-note collapse="true"}
+## How "vendor cost" is estimated here
+The vendor's cost to serve is taken as `AI cost per task × volume` — the same figure across
+all five bars, because the underlying agent and workload don't change, only the commercial
+wrapper around them. Any base/platform fee is assumed to cover its own overhead and is left
+out of this cost line, so profit here is a **gross margin on the AI cost of goods**, not a
+fully-loaded operating margin.
+:::
 
 ```{ojs}
 //| label: insight
@@ -138,7 +176,9 @@ Plot.plot({
 Inputs.table(prices.map(d => ({
   Model: d.model,
   "Monthly (£)": gbp(d.price),
-  "Annual (£)": gbp(d.price * 12),
+  "Vendor cost (£)": gbp(d.cost),
+  "Profit (£)": gbp(d.profit),
+  "Margin": (d.marginPct * 100).toFixed(0) + "%",
   "vs human": (d.price / humanMonthly * 100).toFixed(0) + "%",
   Basis: d.note
 })), {rows: 6, layout: "auto"})
