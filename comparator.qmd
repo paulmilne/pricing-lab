@@ -160,7 +160,14 @@ prices = {
   const m2UnitPrice  = (m2UnitCost + m2AllocOverhead) / (1 - m2T2Margin) + m2T2RiskPrem;
   const m2Tier2Price = volume * m2UnitPrice;
 
+  // M2 Tier 2's own cost basis (unit cost + allocated overhead) × volume —
+  // this is on a per-call scale, wildly different from the Tier 1 monthly
+  // cost-recovery breakdown, so it needs its own line rather than sharing
+  // vendorCost (which previously produced a nonsensical negative margin here).
+  const m2Tier2Cost = (m2UnitCost + m2AllocOverhead) * volume;
+
   const m2 = isM2Tier1 ? m2Tier1Price : m2Tier2Price;
+  const m2Cost = isM2Tier1 ? vendorCost : m2Tier2Cost;
 
   // M3 follows the CoE reference doc's task-pricing formula directly rather
   // than the overlay: Task Price = (Hours × Rate) × Complexity + Risk Premium.
@@ -179,11 +186,11 @@ prices = {
   const m5      = Math.max(floor, Math.min(ceiling, m5raw));
   const m5bind  = m5raw <= floor ? "floor binds" : m5raw >= ceiling ? "ceiling binds" : "share applies";
 
-  const withProfit = (model, price, note) => ({
+  const withProfit = (model, price, note, cost = vendorCost) => ({
     model, price, note,
-    cost: vendorCost,
-    profit: price - vendorCost,
-    marginPct: price > 0 ? (price - vendorCost) / price : 0,
+    cost,
+    profit: price - cost,
+    marginPct: price > 0 ? (price - cost) / price : 0,
   });
 
   const all = [
@@ -191,7 +198,8 @@ prices = {
     withProfit("M2 Usage",    m2,
       isM2Tier1
         ? `cost recovery @ ${(m2Margin*100).toFixed(0)}% margin`
-        : `${volume.toLocaleString()} calls × ${gbpUnit(m2UnitPrice)}/call`),
+        : `${volume.toLocaleString()} calls × ${gbpUnit(m2UnitPrice)}/call`,
+      m2Cost),
     withProfit("M3 Task",     m3, `${volume.toLocaleString()} tasks × ${gbp(m3TaskPrice)}/task`),
     withProfit("M4 Hybrid",   m4, `base + ${(m4Share*100).toFixed(1)}% of value`),
     withProfit("M5 Outcome",  m5, m5bind),
@@ -266,11 +274,17 @@ Plot.plot({
 ## How "vendor cost" is estimated here
 The vendor's cost to serve is built from the CoE reference doc's **Tier 1 cost-recovery
 breakdown**: Infrastructure + License + Support + CoE Overhead, plus a Risk Reserve (5–10%
-of that base cost). This total is the same figure across all five bars, because the
-underlying agent and workload don't change — only the commercial wrapper around them. Any
-model-specific base/platform fee (M4) is assumed to cover its own overhead and is left out
-of this cost line, so profit here is a **gross margin on cost of goods**, not a
+of that base cost). This total is the same figure across M1, M2 Tier 1, M3, M4 and M5,
+because the underlying agent and workload don't change — only the commercial wrapper around
+them. Any model-specific base/platform fee (M4) is assumed to cover its own overhead and is
+left out of this cost line, so profit here is a **gross margin on cost of goods**, not a
 fully-loaded operating margin.
+
+**M2 Tier 2 is the one exception.** It's priced and billed per unit (unit cost + allocated
+overhead, in pence per call), which is on a completely different scale from the Tier 1
+monthly breakdown above. Comparing its per-call price against a monthly cost figure produced
+a nonsensical negative margin, so M2 Tier 2 instead uses its own cost basis:
+`(unit cost + allocated overhead) × volume`.
 :::
 
 ```{ojs}
