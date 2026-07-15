@@ -73,19 +73,20 @@ viewof m4BaseFee    = Inputs.range([0, 30000],   {value: 8000, step: 500,  label
 
 ```{ojs}
 //| label: value-inputs
-viewof m4Share  = Inputs.range([0.01, 0.03], {value: 0.02, step: 0.005, label: "M4 · value share"})
-viewof m5Share  = Inputs.range([0.02, 0.05], {value: 0.03, step: 0.005, label: "M5 · value share"})
-viewof ceilMult = Inputs.range([3, 5],       {value: 4,    step: 0.5,   label: "M5 · ceiling (× floor)"})
+viewof m4Share = Inputs.range([0.01, 0.03], {value: 0.02, step: 0.005, label: "M4 · value share"})
+viewof m5Share = Inputs.range([0.02, 0.05], {value: 0.03, step: 0.005, label: "M5 · value share"})
 ```
 
-**Risk inputs** — the per-model risk loadings (separate from the generic risk/autonomy
-overlay applied to M1, M2 Tier 1, and M4):
+**Risk / guardrail inputs** — the per-model risk loadings (separate from the generic
+risk/autonomy overlay applied to M1, M2 Tier 1, and M4), plus M5's ceiling, which guards
+against renegotiation risk at scale rather than capturing value:
 
 ```{ojs}
 //| label: risk-inputs
 viewof m2RiskRate   = Inputs.range([0.05, 0.10], {value: 0.07, step: 0.01, label: "M2 T1 · risk reserve (% of cost, 5–10%)"})
 viewof m2T2RiskPrem = Inputs.range([0.00, 0.20], {value: 0.01, step: 0.01, label: "M2 T2 · risk premium (£/call)"})
 viewof m3RiskPrem   = Inputs.range([1, 50],      {value: 10,   step: 1,    label: "M3 · risk premium per task (£)"})
+viewof ceilMult     = Inputs.range([3, 5],       {value: 4,    step: 0.5,  label: "M5 · ceiling (× floor)"})
 ```
 
 :::
