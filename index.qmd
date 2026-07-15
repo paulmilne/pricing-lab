@@ -48,5 +48,5 @@ site, change the formulas, and host your own version on GitHub Pages for free.
 > model, not to quote a real deal. For live engagements, use the CoE pricing templates.
 
 ::: {.text-muted style="font-size: 0.85em; margin-top: 2em;"}
-Version 1.1.0 · Last updated 15 Jul 2026
+Version 1.3.0 · Last updated 15 Jul 2026
 :::
