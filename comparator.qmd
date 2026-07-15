@@ -59,7 +59,11 @@ M4 is Tier 2-only and M5 is Tier 3-only; M1, M2 and M3 each bridge two tiers but
 ::: {.callout-note collapse="true" title="Fine-tune each model (optional)"}
 
 **Cost-plus inputs** — the raw cost components and cost-recovery margins that build up
-each model's base price:
+each model's base price. Mixed units, so read the label carefully: most are flat **£/mo**
+(M2 Tier 1's Infra/License/Support/CoE Overhead, M4's base fee); a few are **per-unit** rates
+that get multiplied by volume or hours inside the formula (M2 Tier 2's unit cost and
+allocated overhead in **£/call**, M3's rate in **£/hr**); the rest are **percentages or
+multipliers**, not costs at all (seat discount, both margins, M3's complexity multiplier):
 
 ```{ojs}
 //| label: cost-inputs
