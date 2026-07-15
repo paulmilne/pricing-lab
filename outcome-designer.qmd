@@ -122,7 +122,7 @@ html`<div style="font-size:.9em;color:#555;margin:-.3em 0 .4em;">
 Plot.plot({
   marginLeft: 70, marginBottom: 40, height: 360,
   x: {label: "Monthly value delivered →", tickFormat: axisFmt, grid: true},
-  y: {label: "↑ Monthly fee to Atos", tickFormat: axisFmt, grid: true},
+  y: {label: "↑ Monthly fee to Vendor", tickFormat: axisFmt, grid: true},
   color: {legend: true, domain: Object.keys(palette), range: Object.values(palette)},
   marks: [
     Plot.ruleY([floor],   {stroke: "#888", strokeDasharray: "4 3"}),
@@ -192,12 +192,12 @@ Plot.plot({
   return html`<div>
     <div style="display:flex;height:34px;border-radius:7px;overflow:hidden;font-size:.82em;color:#fff;font-weight:700;">
       <div style="width:${fp}%;background:#4AA82D;display:flex;align-items:center;justify-content:center;min-width:fit-content;padding:0 .4em;">
-        Atos ${pct(fee/ev)}</div>
+        Vendor ${pct(fee/ev)}</div>
       <div style="width:${kp}%;background:#0073E6;display:flex;align-items:center;justify-content:center;padding:0 .4em;">
         Customer keeps ${pct(keep/ev)}</div>
     </div>
     <div style="font-size:.9em;color:#555;margin-top:.4em;">
-      Atos captures <b>${gbp(fee)}/mo</b>; the customer retains <b>${gbp(keep)}/mo</b> of the value created.
+      Vendor captures <b>${gbp(fee)}/mo</b>; the customer retains <b>${gbp(keep)}/mo</b> of the value created.
       Growing the pool beats grabbing a bigger slice — 3% of £10M beats 15% of £1M.</div>
   </div>`;
 }
@@ -222,7 +222,7 @@ Plot.plot({
 ```
 
 The flat line stays constant until the **ceiling** clips it, then decays. The tiered line
-**steps down smoothly** — capturing more where Atos contribution is proportionally highest
+**steps down smoothly** — capturing more where Vendor contribution is proportionally highest
 (low-to-mid value) and compressing where the customer's own operational context dominates.
 That declining curve is exactly what makes a tiered schedule feel fair, and survive renewal.
 
