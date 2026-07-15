@@ -31,7 +31,10 @@ viewof autonomy  = Inputs.select(["L1", "L2", "L3", "L4", "L5"], {value: "L3", l
 viewof seatDiscount = Inputs.range([0.4, 0.7],   {value: 0.5,  step: 0.05, label: "M1 · seat discount vs human rate"})
 viewof m2Margin     = Inputs.range([0.30, 0.50], {value: 0.40, step: 0.01, label: "M2 · target margin"})
 viewof m2BaseFee    = Inputs.range([0, 5000],    {value: 500,  step: 100,  label: "M2 · monthly base fee (£)"})
-viewof m3Margin     = Inputs.range([0.20, 0.70], {value: 0.40, step: 0.05, label: "M3 · target margin"})
+viewof m3Hours      = Inputs.range([0.1, 8],     {value: 1,    step: 0.1,  label: "M3 · estimated hours per task"})
+viewof m3Rate       = Inputs.range([15, 100],    {value: 40,   step: 5,    label: "M3 · hourly rate (£/hr)"})
+viewof m3Complexity = Inputs.range([1.0, 2.0],   {value: 1.2,  step: 0.1,  label: "M3 · complexity multiplier"})
+viewof m3RiskPrem   = Inputs.range([1, 50],       {value: 10,   step: 1,    label: "M3 · risk premium per task (£)"})
 viewof m4BaseFee    = Inputs.range([0, 30000],   {value: 8000, step: 500,  label: "M4 · base platform fee (£/mo)"})
 viewof m4Share      = Inputs.range([0.01, 0.03], {value: 0.02, step: 0.005,label: "M4 · value share"})
 viewof m5Share      = Inputs.range([0.02, 0.05], {value: 0.03, step: 0.005,label: "M5 · value share"})
@@ -68,7 +71,14 @@ vendorCost = aiCost * volume;
 prices = {
   const m1 = overlay(fteCount * (fteCost / 12) * seatDiscount);
   const m2 = overlay(m2BaseFee + volume * (aiCost / (1 - m2Margin)));
-  const m3 = overlay(volume * (aiCost / (1 - m3Margin)));
+
+  // M3 follows the CoE reference doc's task-pricing formula directly rather
+  // than the overlay: Task Price = (Hours × Rate) × Complexity + Risk Premium.
+  // It skips the generic risk/autonomy overlay because its own risk premium
+  // term already prices that in per task — applying both would double-count it.
+  const m3TaskPrice = (m3Hours * m3Rate) * m3Complexity + m3RiskPrem;
+  const m3 = volume * m3TaskPrice;
+
   const m4 = overlay(m4BaseFee + value * m4Share);
 
   // M5 has its own floor/ceiling guardrails rather than the overlay
@@ -89,7 +99,7 @@ prices = {
   return [
     withProfit("M1 Per Seat", m1, `${(seatDiscount*100).toFixed(0)}% of human rate`),
     withProfit("M2 Usage",    m2, `${volume.toLocaleString()} tasks × unit price`),
-    withProfit("M3 Task",     m3, `${volume.toLocaleString()} tasks × task price`),
+    withProfit("M3 Task",     m3, `${volume.toLocaleString()} tasks × ${gbp(m3TaskPrice)}/task`),
     withProfit("M4 Hybrid",   m4, `base + ${(m4Share*100).toFixed(1)}% of value`),
     withProfit("M5 Outcome",  m5, m5bind),
   ];
@@ -186,8 +196,8 @@ Inputs.table(prices.map(d => ({
 
 ## How each bar is calculated
 
-The risk and autonomy settings apply on top of the four input-based models as a single
-overlay — this is the framework's "apply the premium *on top of* the model price" rule:
+The risk and autonomy settings apply on top of M1, M2 and M4 as a single overlay — this is
+the framework's "apply the premium *on top of* the model price" rule:
 
 $$\text{overlay}(x) = x \times \big(1 + \text{risk premium}\big) \times \text{autonomy modifier}$$
 
@@ -198,9 +208,13 @@ modifier is ×1.00 up to L3, **×1.20 at L4**, and **×1.40 at L5**.
 |---|---|
 | **M1 Per Seat** | $\text{FTEs} \times \dfrac{\text{FTE cost}}{12} \times \text{seat discount}$ |
 | **M2 Usage** | $\text{base fee} + \text{volume} \times \dfrac{\text{AI cost}}{1 - \text{margin}}$ |
-| **M3 Task** | $\text{volume} \times \dfrac{\text{AI cost}}{1 - \text{margin}}$ |
+| **M3 Task** | $\text{volume} \times \Big[(\text{hours} \times \text{hourly rate}) \times \text{complexity} + \text{risk premium}\Big]$ |
 | **M4 Hybrid** | $\text{base fee} + \text{value} \times \text{share \%}$ |
 | **M5 Outcome** | $\max\big(\text{floor},\ \min(\text{ceiling},\ \text{value} \times \text{share \%})\big)$ |
+
+**M3 is the odd one out**: it follows the CoE reference doc's task-pricing formula directly,
+with its own per-task risk premium, rather than the generic risk/autonomy overlay used by
+M1, M2 and M4. Applying the overlay *and* a per-task risk premium would price risk twice.
 
 M5 uses guardrails instead of the overlay: the **floor** is 80% of the (overlaid) M4 base
 fee — protecting your cost recovery — and the **ceiling** is a multiple of that floor,
