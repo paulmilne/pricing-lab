@@ -31,7 +31,7 @@ viewof autonomy  = Inputs.select(["L1", "L2", "L3", "L4", "L5"], {value: "L3", l
 viewof seatDiscount = Inputs.range([0.4, 0.7],   {value: 0.5,  step: 0.05, label: "M1 · seat discount vs human rate"})
 viewof m2Margin     = Inputs.range([0.30, 0.50], {value: 0.40, step: 0.01, label: "M2 · target margin"})
 viewof m2BaseFee    = Inputs.range([0, 5000],    {value: 500,  step: 100,  label: "M2 · monthly base fee (£)"})
-viewof m3Markup     = Inputs.range([0.30, 1.50], {value: 0.60, step: 0.05, label: "M3 · task markup vs cost"})
+viewof m3Margin     = Inputs.range([0.20, 0.70], {value: 0.40, step: 0.05, label: "M3 · target margin"})
 viewof m4BaseFee    = Inputs.range([0, 30000],   {value: 8000, step: 500,  label: "M4 · base platform fee (£/mo)"})
 viewof m4Share      = Inputs.range([0.01, 0.03], {value: 0.02, step: 0.005,label: "M4 · value share"})
 viewof m5Share      = Inputs.range([0.02, 0.05], {value: 0.03, step: 0.005,label: "M5 · value share"})
@@ -61,8 +61,8 @@ humanMonthly = fteCount * fteCost / 12;
 
 prices = {
   const m1 = overlay(fteCount * (fteCost / 12) * seatDiscount);
-  const m2 = overlay(m2BaseFee + volume * (aiCost * (1 + m2Margin)));
-  const m3 = overlay(volume * (aiCost * (1 + m3Markup)));
+  const m2 = overlay(m2BaseFee + volume * (aiCost / (1 - m2Margin)));
+  const m3 = overlay(volume * (aiCost / (1 - m3Margin)));
   const m4 = overlay(m4BaseFee + value * m4Share);
 
   // M5 has its own floor/ceiling guardrails rather than the overlay
@@ -157,8 +157,8 @@ modifier is ×1.00 up to L3, **×1.20 at L4**, and **×1.40 at L5**.
 | Model | Monthly price (before overlay) |
 |---|---|
 | **M1 Per Seat** | $\text{FTEs} \times \dfrac{\text{FTE cost}}{12} \times \text{seat discount}$ |
-| **M2 Usage** | $\text{base fee} + \text{volume} \times \big(\text{AI cost} \times (1 + \text{margin})\big)$ |
-| **M3 Task** | $\text{volume} \times \big(\text{AI cost} \times (1 + \text{markup})\big)$ |
+| **M2 Usage** | $\text{base fee} + \text{volume} \times \dfrac{\text{AI cost}}{1 - \text{margin}}$ |
+| **M3 Task** | $\text{volume} \times \dfrac{\text{AI cost}}{1 - \text{margin}}$ |
 | **M4 Hybrid** | $\text{base fee} + \text{value} \times \text{share \%}$ |
 | **M5 Outcome** | $\max\big(\text{floor},\ \min(\text{ceiling},\ \text{value} \times \text{share \%})\big)$ |
 
