@@ -65,6 +65,21 @@ viewof useTiered = Inputs.toggle({value: true, label: "Show tiered (Lehman) sche
 
 ::: {.callout-note collapse="true" title="Tiered (Lehman) schedule — edit the steps"}
 
+**What is "Lehman tiering"?** It's named after the classic *Lehman Formula*, the
+declining-rate fee scale investment banks have long used for M&A advisory success fees
+(the original 1960s Lehman Brothers rule of thumb was 5% of the first $1M, 4% of the next,
+3% of the next, and so on down to 1%). The mechanism is simple: instead of one flat
+percentage applied to the whole pool of value, the value is split into **bands**, and each
+successive band is charged at a **lower rate** than the one before it.
+
+Applied to outcome-based AI pricing, it solves the exact problem a flat share creates: a
+flat % feels fair on a modest deal, but multiply it across a huge value pool and the fee
+balloons into what looks like a windfall — inviting renegotiation, or worse, a reputation
+for opportunistic pricing. Tiering the rate downward as value climbs keeps the vendor's take
+proportionate at every scale, so the deal that looked fair at signing still looks fair a year
+later when the customer's usage has 10×'d. Below, the three bands (`t1rate` down through
+`t3rate`) default to a 4% / 2.5% / 1% schedule — edit them to see how the fee curve bends.
+
 ```{ojs}
 //| label: tier-edit
 viewof t1rate = Inputs.range([0.01, 0.06], {value: 0.04,  step: 0.005, label: "Rate on first band"})
