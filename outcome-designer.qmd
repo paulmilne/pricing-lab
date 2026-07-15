@@ -28,19 +28,33 @@ a **flat share** looks fine at small value but becomes a renegotiation magnet at
 
 ## Design the deal
 
+**Cost-plus inputs** — the cost-recovery basis the floor is built from:
+
 ```{ojs}
-//| label: inputs
-viewof m4base   = Inputs.range([2000, 40000],   {value: 10000, step: 500,  label: "Equivalent M4 base fee (£/mo)"})
-viewof floorPct = Inputs.range([0.6, 0.8],       {value: 0.8,   step: 0.05, label: "Floor (× M4 base)"})
-viewof ceilMult = Inputs.range([3, 5],           {value: 4,     step: 0.5,  label: "Ceiling (× floor)"})
+//| label: cost-inputs
+viewof m4base   = Inputs.range([2000, 40000], {value: 10000, step: 500,  label: "Equivalent M4 base fee (£/mo)"})
+viewof floorPct = Inputs.range([0.6, 0.8],     {value: 0.8,   step: 0.05, label: "Floor (× M4 base)"})
+```
+
+**Value inputs** — what the deal is worth, and the share of it the fee captures:
+
+```{ojs}
+//| label: value-inputs
 viewof valueType = Inputs.select([
   "Cost takeout (labour replaced)",
   "Cost avoidance (fraud, penalties)",
   "Revenue uplift (attributed)",
   "Risk reduction (liability avoided)"
 ], {label: "Value type", value: "Cost takeout (labour replaced)"})
-viewof flatShare = Inputs.range([0.01, 0.06],    {value: 0.03,  step: 0.005, label: "Flat share %"})
-viewof expValue  = Inputs.range([0, 5000000],    {value: 1000000, step: 50000, label: "Expected monthly value (£)"})
+viewof flatShare = Inputs.range([0.01, 0.06], {value: 0.03,  step: 0.005, label: "Flat share %"})
+viewof expValue  = Inputs.range([0, 5000000], {value: 1000000, step: 50000, label: "Expected monthly value (£)"})
+```
+
+**Risk / guardrail inputs** — caps the customer's exposure (and the vendor's renegotiation risk) at scale:
+
+```{ojs}
+//| label: risk-inputs
+viewof ceilMult = Inputs.range([3, 5], {value: 4, step: 0.5, label: "Ceiling (× floor)"})
 ```
 
 ```{ojs}
