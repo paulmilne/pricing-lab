@@ -120,9 +120,11 @@ html`<div style="font-size:.9em;color:#555;margin:-.3em 0 .4em;">
 ```{ojs}
 //| label: feechart
 Plot.plot({
-  marginLeft: 70, marginBottom: 40, height: 360,
+  marginLeft: 70, marginTop: 30, marginBottom: 40, height: 360,
   x: {label: "Monthly value delivered →", tickFormat: axisFmt, grid: true},
-  y: {label: "↑ Monthly fee to Vendor", tickFormat: axisFmt, grid: true},
+  y: {label: "↑ Monthly fee to Vendor", tickFormat: axisFmt, grid: true,
+      // Headroom so the "ceiling ..." label above the plateaued line isn't clipped.
+      domain: [0, ceiling * 1.18]},
   color: {legend: true, domain: Object.keys(palette), range: Object.values(palette)},
   marks: [
     Plot.ruleY([floor],   {stroke: "#888", strokeDasharray: "4 3"}),
