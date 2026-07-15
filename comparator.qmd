@@ -63,7 +63,13 @@ each model's base price. Mixed units, so read the label carefully: most are flat
 (M2 Tier 1's Infra/License/Support/CoE Overhead, M4's base fee); a few are **per-unit** rates
 that get multiplied by volume or hours inside the formula (M2 Tier 2's unit cost and
 allocated overhead in **£/call**, M3's rate in **£/hr**); the rest are **percentages or
-multipliers**, not costs at all (seat discount, both margins, M3's complexity multiplier):
+multipliers**, not costs at all (seat discount, both margins, M3's complexity multiplier).
+
+Note that **Infrastructure cost only applies if the vendor runs its own infra** (self-hosted
+compute/storage/network). If the vendor instead builds on a third-party/cloud platform, those
+infra costs disappear from the vendor's own stack — the third party bears them and charges
+the vendor a base fee + usage instead, which belongs under License cost. Set Infrastructure
+to ~£0 in that case.
 
 ```{ojs}
 //| label: cost-inputs
@@ -71,8 +77,14 @@ viewof seatDiscount = Inputs.range([0.4, 0.7],   {value: 0.5,  step: 0.05, label
 
 // M2 · Tier 1 cost-recovery breakdown (CoE reference doc):
 // Internal Price = (Infrastructure + License + Support + Risk Reserve + CoE Overhead) / (1 - Margin)
-viewof m2Infra      = Inputs.range([200, 5000],  {value: 1200, step: 100,  label: "M2 · infrastructure cost (£/mo — compute + storage + network)"})
-viewof m2License     = Inputs.range([100, 5000], {value: 900,  step: 100,  label: "M2 · license cost (£/mo — vendor fees per agent/API call)"})
+//
+// NB: Infrastructure cost only applies if the vendor operates its own infra
+// (self-hosted compute/storage/network). On a third-party/cloud model, those
+// costs disappear from the vendor's own stack — the cloud provider bears them
+// and instead charges the vendor a base fee + usage, which shows up here as
+// License cost, not Infrastructure cost. Set Infrastructure to ~£0 in that case.
+viewof m2Infra      = Inputs.range([0, 5000],   {value: 1200, step: 100,  label: "M2 · infrastructure cost (£/mo — compute+storage+network; 0 if self-managed infra not used)"})
+viewof m2License     = Inputs.range([100, 5000], {value: 900,  step: 100,  label: "M2 · license cost (£/mo — vendor fees per agent/API call; incl. 3rd-party base fee + usage if outsourced)"})
 viewof m2Support    = Inputs.range([200, 5000],  {value: 1500, step: 100,  label: "M2 · support cost (£/mo — CoE FTE allocation)"})
 viewof m2CoEOverhead = Inputs.range([100, 3000], {value: 600,  step: 100,  label: "M2 · CoE overhead (£/mo — governance, training, monitoring)"})
 viewof m2Margin     = Inputs.range([0, 0.20],    {value: 0.15, step: 0.01, label: "M2 · margin (0–20%, cost recovery)"})
