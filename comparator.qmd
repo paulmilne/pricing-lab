@@ -32,6 +32,19 @@ saving you can share; anything above it needs a very good value story.
 ## Set up the engagement
 
 ```{ojs}
+//| label: tier-from-url
+// The Model Selector links here with ?tier=1|2|3 so the comparator opens on
+// the tier it just recommended, instead of always defaulting to Tier 2.
+TIER_LABELS = ({
+  "1": "Tier 1 · Internal Use",
+  "2": "Tier 2 · Platform Services",
+  "3": "Tier 3 · Digital Labor",
+})
+initialTier = TIER_LABELS[new URLSearchParams(window.location.search).get("tier")]
+  ?? "Tier 2 · Platform Services"
+```
+
+```{ojs}
 //| label: primary-inputs
 viewof fteCost   = Inputs.range([30000, 120000], {value: 60000, step: 1000, label: "Human FTE cost (£/yr, fully loaded)"})
 viewof fteCount  = Inputs.range([1, 20],          {value: 3,     step: 1,    label: "FTEs replaced / augmented"})
@@ -41,7 +54,7 @@ viewof riskScore = Inputs.range([1, 10],          {value: 5,     step: 1,    lab
 viewof autonomy  = Inputs.select(["L1", "L2", "L3", "L4", "L5"], {value: "L3", label: "Autonomy level"})
 viewof dealTier  = Inputs.radio(
   ["Tier 1 · Internal Use", "Tier 2 · Platform Services", "Tier 3 · Digital Labor"],
-  {value: "Tier 2 · Platform Services", label: "Deployment tier"}
+  {value: initialTier, label: "Deployment tier"}
 )
 ```
 

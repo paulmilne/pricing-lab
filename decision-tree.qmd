@@ -207,7 +207,11 @@ TREE = ({
     r.notes.forEach(n => ul.append(html`<li>${n}</li>`));
     panel.append(ul);
 
-    panel.append(html`<div style="margin-top:.95em;font-size:.95em;">→ Now price it in the <a href="comparator.html">Five-Model Comparator</a>.</div>`);
+    // Pass the resolved tier along so the comparator opens on the same tier
+    // this recommendation is for, instead of always defaulting to Tier 2.
+    const tierNum = r.tier.startsWith("Tier 1") ? 1 : r.tier.startsWith("Tier 2") ? 2 : r.tier.startsWith("Tier 3") ? 3 : null;
+    const compHref = tierNum ? `comparator.html?tier=${tierNum}` : `comparator.html`;
+    panel.append(html`<div style="margin-top:.95em;font-size:.95em;">→ Now price it in the <a href="${compHref}">Five-Model Comparator</a>.</div>`);
     wrap.append(panel);
   }
 
