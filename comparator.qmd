@@ -3,6 +3,18 @@ title: "The Five-Model Comparator"
 subtitle: "One engagement, priced five ways"
 ---
 
+```{=html}
+<style>
+/* Observable Inputs hardcodes label width at 120px via --label-width, which
+   wraps our longer slider labels onto multiple lines. Widen it and let the
+   input column shrink a bit to compensate. */
+[class^="inputs-"] {
+  --label-width: 340px !important;
+  --input-width: 220px !important;
+}
+</style>
+```
+
 Pick a single engagement below — how many people it replaces, how much work it does, how
 much value it creates — then watch what the customer pays each month under **all five
 pricing models at once**. Nothing about the *product* changes between the bars. Only the
