@@ -110,6 +110,10 @@ viewof m2T2Margin   = Inputs.range([0.30, 0.50], {value: 0.40, step: 0.01, label
 viewof m3Hours      = Inputs.range([0.1, 8],     {value: 1,    step: 0.1,  label: "M3 · estimated hours per task"})
 viewof m3Rate       = Inputs.range([15, 100],    {value: 40,   step: 5,    label: "M3 · hourly rate (£/hr)"})
 viewof m3Complexity = Inputs.range([1.0, 2.0],   {value: 1.2,  step: 0.1,  label: "M3 · complexity multiplier"})
+// M3's own cost basis: unlike its price (hours × human-equivalent rate), the
+// vendor's actual cost to run each task is AI compute, not labour. This is
+// deliberately a rough, uncertain estimate — see the sensitivity table below.
+viewof m3ComputeCost = Inputs.range([0.5, 20], {value: 5, step: 0.5, label: "M3 · AI compute cost per task (£, your estimate)"})
 viewof m4BaseFee    = Inputs.range([0, 30000],   {value: 8000, step: 500,  label: "M4 · base platform fee (£/mo)"})
 ```
 
@@ -204,6 +208,7 @@ prices = {
   // term already prices that in per task — applying both would double-count it.
   const m3TaskPrice = (m3Hours * m3Rate) * m3Complexity + m3RiskPrem;
   const m3 = volume * m3TaskPrice;
+  const m3Cost = m3ComputeCost * volume;
 
   const m4 = overlay(m4BaseFee + value * m4Share);
 
@@ -229,7 +234,7 @@ prices = {
         ? `cost recovery @ ${(m2Margin*100).toFixed(0)}% margin`
         : `${volume.toLocaleString()} calls × ${gbpUnit(m2UnitPrice)}/call`,
       m2Cost),
-    withProfit("M3 Task",     m3, `${volume.toLocaleString()} tasks × ${gbp(m3TaskPrice)}/task`),
+    withProfit("M3 Task",     m3, `${volume.toLocaleString()} tasks × ${gbp(m3TaskPrice)}/task`, m3Cost),
     withProfit("M4 Hybrid",   m4, `base + ${(m4Share*100).toFixed(1)}% of value`),
     withProfit("M5 Outcome",  m5, m5bind),
   ];
@@ -316,17 +321,60 @@ Plot.plot({
 ## How "vendor cost" is estimated here
 The vendor's cost to serve is built from the CoE reference doc's **Tier 1 cost-recovery
 breakdown**: Infrastructure + License + Support + CoE Overhead, plus a Risk Reserve (5–10%
-of that base cost). This total is the same figure across M1, M2 Tier 1, M3, M4 and M5,
-because the underlying agent and workload don't change — only the commercial wrapper around
-them. Any model-specific base/platform fee (M4) is assumed to cover its own overhead and is
-left out of this cost line, so profit here is a **gross margin on cost of goods**, not a
+of that base cost). This total is the same figure across M1, M2 Tier 1, M4 and M5, because
+the underlying agent and workload don't change — only the commercial wrapper around them.
+Any model-specific base/platform fee (M4) is assumed to cover its own overhead and is left
+out of this cost line, so profit here is a **gross margin on cost of goods**, not a
 fully-loaded operating margin.
 
-**M2 Tier 2 is the one exception.** It's priced and billed per unit (unit cost + allocated
-overhead, in pence per call), which is on a completely different scale from the Tier 1
-monthly breakdown above. Comparing its per-call price against a monthly cost figure produced
-a nonsensical negative margin, so M2 Tier 2 instead uses its own cost basis:
-`(unit cost + allocated overhead) × volume`.
+**M2 Tier 2 and M3 are the two exceptions**, each for the same underlying reason: their
+price scales with volume, but the Tier 1 monthly breakdown doesn't, so comparing them
+produces a nonsensical or exaggerated margin. M2 Tier 2 is priced and billed per unit (unit
+cost + allocated overhead, in pence per call) — a completely different scale from the Tier 1
+monthly figure — so it uses `(unit cost + allocated overhead) × volume` instead. M3 is priced
+off a **human-equivalent hourly rate** (its task price is `hours × rate`), but the vendor's
+actual cost to run it is AI compute — genuinely much cheaper — so it uses its own
+`AI compute cost per task × volume` line instead.
+:::
+
+::: {.callout-tip collapse="true" title="How sensitive is M3's margin to the compute-cost assumption?"}
+M3's "AI compute cost per task" slider above is the roughest estimate on this page — there's
+no reference-doc figure for it, unlike the Tier 1 breakdown. The table below holds M3's task
+price fixed at the current slider settings (hours, rate, complexity, risk premium) and shows
+how the resulting margin swings across a range of plausible compute-cost assumptions.
+
+Note there's no volume column here: because M3's cost now scales with volume the same way
+its price does (both are `× volume`), volume cancels out of the margin ratio entirely —
+margin is the same at 500 tasks/mo or 10,000. That's a direct improvement from the fix
+above; the original bug was specifically that margin used to inflate with volume because
+only the price scaled and the cost didn't.
+
+```{ojs}
+//| label: m3-sensitivity
+//| echo: false
+m3SensCosts = [1, 2, 5, 8, 10, 15, 20]
+
+// Recomputed locally (m3TaskPrice itself is scoped inside the `prices` cell,
+// not exposed at top level) from the same formula: hours × rate × complexity + risk premium.
+m3TaskPriceForSens = (m3Hours * m3Rate) * m3Complexity + m3RiskPrem
+
+m3MarginAtCost = (cost) => m3TaskPriceForSens > 0
+  ? (m3TaskPriceForSens - cost) / m3TaskPriceForSens : 0
+
+Inputs.table(
+  [Object.fromEntries([
+    ["", "Resulting margin"],
+    ...m3SensCosts.map(cost => [`£${cost}/task`, `${(m3MarginAtCost(cost) * 100).toFixed(0)}%`])
+  ])],
+  {layout: "auto"}
+)
+```
+
+At the current hours/rate/complexity/risk-premium settings, read along the row to see how
+sensitive the margin is to a compute-cost figure you're genuinely unsure about. If it stays
+high across most plausible values, that's the AI-cost-arbitrage story working as intended;
+if a realistic compute cost would erase most of it, M3's price (or its complexity/risk
+assumptions) may be underpriced for this workload.
 :::
 
 ```{ojs}
