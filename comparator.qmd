@@ -111,9 +111,13 @@ viewof m3Hours      = Inputs.range([0.1, 8],     {value: 1,    step: 0.1,  label
 viewof m3Rate       = Inputs.range([15, 100],    {value: 40,   step: 5,    label: "M3 · hourly rate (£/hr)"})
 viewof m3Complexity = Inputs.range([1.0, 2.0],   {value: 1.2,  step: 0.1,  label: "M3 · complexity multiplier"})
 // M3's own cost basis: unlike its price (hours × human-equivalent rate), the
-// vendor's actual cost to run each task is AI compute, not labour. This is
-// deliberately a rough, uncertain estimate — see the sensitivity table below.
-viewof m3ComputeCost = Inputs.range([0.5, 20], {value: 5, step: 0.5, label: "M3 · AI compute cost per task (£, your estimate)"})
+// vendor's actual cost to run each task is AI compute — i.e. tokens, not
+// labour. Modelled the same way as token-distribution.qmd: a log-normal
+// distribution of tokens per task (median + CoV), costed at the P90 tail,
+// not the mean — see the explanation below.
+viewof m3MedianTokens = Inputs.range([5000, 150000], {value: 40000, step: 1000, label: "M3 · median tokens per task"})
+viewof m3TokenRate    = Inputs.range([0.05, 2.00],   {value: 0.50,  step: 0.05, label: "M3 · token rate (£ per 1,000 tokens)"})
+viewof m3TokenCoV     = Inputs.range([0.2, 1.5],     {value: 0.7,   step: 0.05, label: "M3 · token cost variability (CoV)"})
 viewof m4BaseFee    = Inputs.range([0, 30000],   {value: 8000, step: 500,  label: "M4 · base platform fee (£/mo)"})
 ```
 
@@ -180,6 +184,20 @@ m2BaseCost    = m2Infra + m2License + m2Support + m2CoEOverhead;
 m2RiskReserve = m2BaseCost * m2RiskRate;
 vendorCost    = m2BaseCost + m2RiskReserve;
 
+// M3's compute cost, modelled as a log-normal token-cost distribution — same
+// approach as token-distribution.qmd. Z90 is the standard normal's 90th
+// percentile (fixed constant), used instead of a general quantile function
+// since we only ever need the P90 point on this curve.
+Z90 = 1.2816
+m3TokenSigma   = Math.sqrt(Math.log(1 + m3TokenCoV ** 2))
+m3TokenMuC     = Math.log(m3MedianTokens) + Math.log(m3TokenRate / 1000)
+m3ComputeCostMean = Math.exp(m3TokenMuC + m3TokenSigma ** 2 / 2)
+m3ComputeCostP90  = Math.exp(m3TokenMuC + Z90 * m3TokenSigma)
+
+// Exposed at top level (not just inside the `prices` cell below) so the
+// sensitivity tables further down the page can reference it too.
+m3TaskPrice = (m3Hours * m3Rate) * m3Complexity + m3RiskPrem
+
 prices = {
   const m1 = overlay(fteCount * (fteCost / 12) * seatDiscount);
 
@@ -206,9 +224,8 @@ prices = {
   // than the overlay: Task Price = (Hours × Rate) × Complexity + Risk Premium.
   // It skips the generic risk/autonomy overlay because its own risk premium
   // term already prices that in per task — applying both would double-count it.
-  const m3TaskPrice = (m3Hours * m3Rate) * m3Complexity + m3RiskPrem;
   const m3 = volume * m3TaskPrice;
-  const m3Cost = m3ComputeCost * volume;
+  const m3Cost = m3ComputeCostP90 * volume;
 
   const m4 = overlay(m4BaseFee + value * m4Share);
 
@@ -333,48 +350,75 @@ produces a nonsensical or exaggerated margin. M2 Tier 2 is priced and billed per
 cost + allocated overhead, in pence per call) — a completely different scale from the Tier 1
 monthly figure — so it uses `(unit cost + allocated overhead) × volume` instead. M3 is priced
 off a **human-equivalent hourly rate** (its task price is `hours × rate`), but the vendor's
-actual cost to run it is AI compute — genuinely much cheaper — so it uses its own
-`AI compute cost per task × volume` line instead.
+actual cost to run it is AI compute — i.e. **tokens** — so it uses its own token-based cost
+line instead (see below).
 :::
 
-::: {.callout-tip collapse="true" title="How sensitive is M3's margin to the compute-cost assumption?"}
-M3's "AI compute cost per task" slider above is the roughest estimate on this page — there's
-no reference-doc figure for it, unlike the Tier 1 breakdown. The table below holds M3's task
-price fixed at the current slider settings (hours, rate, complexity, risk premium) and shows
-how the resulting margin swings across a range of plausible compute-cost assumptions.
-
-Note there's no volume column here: because M3's cost now scales with volume the same way
-its price does (both are `× volume`), volume cancels out of the margin ratio entirely —
-margin is the same at 500 tasks/mo or 10,000. That's a direct improvement from the fix
-above; the original bug was specifically that margin used to inflate with volume because
-only the price scaled and the cost didn't.
+::: {.callout-tip collapse="true" title="M3's compute cost: tokens, not a flat guess — and costed at the tail, not the mean"}
+An earlier version of this page modelled M3's compute cost as a flat "£ per task" guess.
+That was wrong on two counts: AI compute cost is fundamentally a **token cost** (tokens per
+task × £ per 1,000 tokens), and — per `token-distribution.qmd` — token cost per task is a
+**long-tailed distribution**, not a single number. Pricing (or costing) off the *mean* of
+that distribution quietly ignores the tail of expensive runs, so M3's cost basis here uses
+the **P90** of the same log-normal model that page uses (median tokens + Coefficient of
+Variation), not the mean.
 
 ```{ojs}
 //| label: m3-sensitivity
 //| echo: false
-m3SensCosts = [1, 2, 5, 8, 10, 15, 20]
 
-// Recomputed locally (m3TaskPrice itself is scoped inside the `prices` cell,
-// not exposed at top level) from the same formula: hours × rate × complexity + risk premium.
-m3TaskPriceForSens = (m3Hours * m3Rate) * m3Complexity + m3RiskPrem
+Inputs.table(
+  [{
+    "": "Cost basis",
+    "£/task": gbpUnit(m3ComputeCostMean),
+    "Margin at this cost": `${((1 - m3ComputeCostMean / m3TaskPrice) * 100).toFixed(0)}%`,
+  }, {
+    "": "P90 (used above)",
+    "£/task": gbpUnit(m3ComputeCostP90),
+    "Margin at this cost": `${((1 - m3ComputeCostP90 / m3TaskPrice) * 100).toFixed(0)}%`,
+  }],
+  {layout: "auto"}
+)
+```
 
-m3MarginAtCost = (cost) => m3TaskPriceForSens > 0
-  ? (m3TaskPriceForSens - cost) / m3TaskPriceForSens : 0
+```{ojs}
+//| label: m3-mean-vs-p90-note
+//| echo: false
+html`<p>At the current token settings, costing off the mean instead of the P90 would
+understate M3's true cost by <b>${((1 - m3ComputeCostMean / m3ComputeCostP90) * 100).toFixed(0)}%</b>
+— the same mistake <code>token-distribution.qmd</code> warns about, just showing up here as
+an inflated margin instead of a mispriced quote.</p>`
+```
+
+The table below then shows how sensitive M3's P90-based margin is to the token
+**Coefficient of Variation** — the "how fat is the tail" input — holding median tokens and
+token rate at their current slider values. (There's no volume column: M3's cost now scales
+with volume exactly like its price does, so volume cancels out of the margin ratio entirely.)
+
+```{ojs}
+//| label: m3-cov-sensitivity
+//| echo: false
+m3SensCoVs = [0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.5]
+
+m3MarginAtCoV = (cov) => {
+  const sigma = Math.sqrt(Math.log(1 + cov ** 2));
+  const costP90 = Math.exp(m3TokenMuC + Z90 * sigma);
+  return m3TaskPrice > 0 ? (m3TaskPrice - costP90) / m3TaskPrice : 0;
+}
 
 Inputs.table(
   [Object.fromEntries([
-    ["", "Resulting margin"],
-    ...m3SensCosts.map(cost => [`£${cost}/task`, `${(m3MarginAtCost(cost) * 100).toFixed(0)}%`])
+    ["", "Margin at P90 cost"],
+    ...m3SensCoVs.map(cov => [`CoV ${cov}`, `${(m3MarginAtCoV(cov) * 100).toFixed(0)}%`])
   ])],
   {layout: "auto"}
 )
 ```
 
-At the current hours/rate/complexity/risk-premium settings, read along the row to see how
-sensitive the margin is to a compute-cost figure you're genuinely unsure about. If it stays
-high across most plausible values, that's the AI-cost-arbitrage story working as intended;
-if a realistic compute cost would erase most of it, M3's price (or its complexity/risk
-assumptions) may be underpriced for this workload.
+At low CoV (a narrow, predictable token distribution) the P90 sits close to the mean, so
+margin is high and stable. As CoV climbs toward the realistic 0.6–0.8 range, the P90 tail
+stretches further from the mean, compute cost rises, and margin compresses — exactly the
+lesson `token-distribution.qmd` teaches, now showing up directly in M3's numbers.
 :::
 
 ```{ojs}
