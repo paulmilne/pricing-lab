@@ -28,39 +28,54 @@ a **flat share** looks fine at small value but becomes a renegotiation magnet at
 
 ## Design the deal
 
+```{ojs}
+//| label: input-helper
+//| echo: false
+// Every viewof below is wrapped in this so hovering shows a native browser
+// tooltip specific to that input — same approach as comparator.qmd.
+withDescription = (input, text) => { input.title = text; return input; }
+```
+
 **Cost-plus inputs** — the cost-recovery basis the floor is built from:
 
 ```{ojs}
 //| label: cost-inputs
-viewof m4base   = Inputs.range([2000, 40000], {value: 10000, step: 500,  label: "Equivalent M4 base fee (£/mo)"})
-viewof floorPct = Inputs.range([0.6, 0.8],     {value: 0.8,   step: 0.05, label: "Floor (× M4 base)"})
+viewof m4base   = withDescription(Inputs.range([2000, 40000], {value: 10000, step: 500,  label: "Equivalent M4 base fee (£/mo)"}),
+  "Not an M5 fee itself — this is what M4 would charge for the same engagement, used only to derive the floor below.")
+viewof floorPct = withDescription(Inputs.range([0.6, 0.8],     {value: 0.8,   step: 0.05, label: "Floor (× M4 base)"}),
+  "Floor = this × the M4 base fee above. Protects cost recovery — the fee can never drop below this, regardless of how the flat/tiered share and value combine.")
 ```
 
 **Value inputs** — what the deal is worth, and the share of it the fee captures:
 
 ```{ojs}
 //| label: value-inputs
-viewof valueType = Inputs.select([
+viewof valueType = withDescription(Inputs.select([
   "Cost takeout (labour replaced)",
   "Cost avoidance (fraud, penalties)",
   "Revenue uplift (attributed)",
   "Risk reduction (liability avoided)"
-], {label: "Value type", value: "Cost takeout (labour replaced)"})
-viewof flatShare = Inputs.range([0.01, 0.06], {value: 0.03,  step: 0.005, label: "Flat share %"})
-viewof expValue  = Inputs.range([0, 5000000], {value: 1000000, step: 50000, label: "Expected monthly value (£)"})
+], {label: "Value type", value: "Cost takeout (labour replaced)"}),
+  "What kind of value this fee is a share of. Doesn't change the calculation below — it's descriptive, framing which real-world verifiability questions apply to this deal.")
+viewof flatShare = withDescription(Inputs.range([0.01, 0.06], {value: 0.03,  step: 0.005, label: "Flat share %"}),
+  "% of expected value charged under the flat-share model — the one this whole page argues against once value scales.")
+viewof expValue  = withDescription(Inputs.range([0, 5000000], {value: 1000000, step: 50000, label: "Expected monthly value (£)"}),
+  "Expected monthly value the engagement creates. Drives both the flat-share and tiered fee curves below.")
 ```
 
 **Risk / guardrail inputs** — caps the customer's exposure (and the vendor's renegotiation risk) at scale:
 
 ```{ojs}
 //| label: risk-inputs
-viewof ceilMult = Inputs.range([3, 5], {value: 4, step: 0.5, label: "Ceiling (× floor)"})
+viewof ceilMult = withDescription(Inputs.range([3, 5], {value: 4, step: 0.5, label: "Ceiling (× floor)"}),
+  "Caps the fee at this multiple of the floor. Guards against renegotiation risk if value scales a long way past what was priced for.")
 ```
 
 ```{ojs}
 //| label: tiered-inputs
 //| code-summary: ""
-viewof useTiered = Inputs.toggle({value: true, label: "Show tiered (Lehman) schedule"})
+viewof useTiered = withDescription(Inputs.toggle({value: true, label: "Show tiered (Lehman) schedule"}),
+  "Toggle between a flat % share (one rate, whole value) and the tiered Lehman-style schedule below (declining rate by band).")
 ```
 
 ::: {.callout-note collapse="true" title="Tiered (Lehman) schedule — edit the steps"}
@@ -82,11 +97,16 @@ later when the customer's usage has 10×'d. Below, the three bands (`t1rate` dow
 
 ```{ojs}
 //| label: tier-edit
-viewof t1rate = Inputs.range([0.01, 0.06], {value: 0.04,  step: 0.005, label: "Rate on first band"})
-viewof t1cap  = Inputs.range([100000, 1000000], {value: 500000, step: 50000, label: "First band up to (£/mo)"})
-viewof t2rate = Inputs.range([0.01, 0.05], {value: 0.025, step: 0.005, label: "Rate on second band"})
-viewof t2cap  = Inputs.range([1000000, 3000000], {value: 2000000, step: 100000, label: "Second band up to (£/mo)"})
-viewof t3rate = Inputs.range([0.005, 0.03],{value: 0.01,  step: 0.005, label: "Rate above second band"})
+viewof t1rate = withDescription(Inputs.range([0.01, 0.06], {value: 0.04,  step: 0.005, label: "Rate on first band"}),
+  "Highest of the three rates — charged on value up to the first band's cap below.")
+viewof t1cap  = withDescription(Inputs.range([100000, 1000000], {value: 500000, step: 50000, label: "First band up to (£/mo)"}),
+  "Value up to this point is charged at the first (highest) rate above.")
+viewof t2rate = withDescription(Inputs.range([0.01, 0.05], {value: 0.025, step: 0.005, label: "Rate on second band"}),
+  "Middle rate — charged on the slice of value between the first and second band caps.")
+viewof t2cap  = withDescription(Inputs.range([1000000, 3000000], {value: 2000000, step: 100000, label: "Second band up to (£/mo)"}),
+  "Value between the first cap and this point is charged at the second rate above.")
+viewof t3rate = withDescription(Inputs.range([0.005, 0.03],{value: 0.01,  step: 0.005, label: "Rate above second band"}),
+  "Lowest of the three rates — charged on any value above the second band's cap, keeping the fee proportionate at very large scale.")
 ```
 
 :::
