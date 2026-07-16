@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Causal Map – Agentic AI Pricing Lab</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-0815c480559380816a4d1ea211a47e91.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fd2ced95396e46133fbf8d7370d09dcd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Agentic AI Pricing Lab</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./decision-tree.html"> 
+<span class="menu-text">Model Selector</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./comparator.html"> 
+<span class="menu-text">Five-Model Comparator</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./token-distribution.html"> 
+<span class="menu-text">Token Distribution</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./outcome-designer.html"> 
+<span class="menu-text">M5 Outcome Designer</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./causal-diagram.html" aria-current="page"> 
+<span class="menu-text">Causal Map</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#master-diagram" id="toc-master-diagram" class="nav-link active" data-scroll-target="#master-diagram">Master diagram</a></li>
+  <li><a href="#zoom-m2-tier-2" id="toc-zoom-m2-tier-2" class="nav-link" data-scroll-target="#zoom-m2-tier-2">Zoom: M2 Tier 2</a></li>
+  <li><a href="#zoom-m3-task" id="toc-zoom-m3-task" class="nav-link" data-scroll-target="#zoom-m3-task">Zoom: M3 Task</a></li>
+  <li><a href="#known-gaps-dashed-edges-above" id="toc-known-gaps-dashed-edges-above" class="nav-link" data-scroll-target="#known-gaps-dashed-edges-above">Known gaps (dashed edges above)</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Causal Map</h1>
+<p class="subtitle lead">How the inputs actually drive cost, price and margin — and where they don’t yet, but arguably should</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Every fix in this lab so far has come from tracing a chain of dependencies that wasn’t visible until something broke: volume meaning different things for different models, a mean-based price sitting next to a P90-based cost, a “risk score” that only touches three of the five models. This page draws that map out up front.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Reading the diagrams
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Solid arrows</strong> are real dependencies — implemented in <code>comparator.qmd</code>’s code today, and you can move the corresponding slider and watch the number change. <strong>Dashed arrows</strong> are <em>conceptual</em> links — relationships that plausibly should exist given how the reference doc and the rest of this site talk about risk and variability, but which the model currently treats as independent sliders. They’re flagged here as a map of where the model is simplified, not a defect list.</p>
+</div>
+</div>
+<section id="master-diagram" class="level2">
+<h2 class="anchored" data-anchor-id="master-diagram">Master diagram</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart TB
+  subgraph EXT["External / qualitative drivers (upstream of the sliders)"]
+    complexity["Task / workflow complexity"]
+    autonomyQ["Autonomy level (L1–L5)"]
+    riskQ["Risk score (1–10)"]
+    tier["Deployment tier (1 / 2 / 3)"]
+  end
+
+  subgraph SHARED["Shared engagement inputs"]
+    fte["FTE count × FTE cost\n→ human baseline (£/mo)"]
+    vol["Volume (tasks delivered/mo)"]
+    val["Business value created (£/mo)"]
+  end
+
+  subgraph TOKENS["Token-cost model (M2 T2 and M3, independently parameterised)"]
+    cov["Token CoV\n(variability)"]
+    meanC["Mean token cost"]
+    p90C["P90 token cost (tail)"]
+    cov --&gt; meanC
+    cov --&gt; p90C
+  end
+
+  tier --&gt;|filters which models show| models["Active models (§5.4 mapping)"]
+  tier --&gt;|picks M2's formula| m2choice["M2 Tier 1 (flat) vs Tier 2 (per-call)"]
+
+  riskQ --&gt;|overlay: +5%..+100%| overlayN["overlay() — M1, M2 T1, M4 only"]
+  autonomyQ --&gt;|×1.0 / ×1.2 / ×1.4| overlayN
+  riskQ -.-&gt;|"NOT wired — M2 T2 &amp; M3 have their\nown independent risk-premium sliders"| ownRisk["M2 T2 / M3 risk premium"]
+
+  complexity --&gt;|m3Complexity multiplier| m3price["M3 task price"]
+  complexity -.-&gt;|"NOT wired — CoV is set\nindependently, not derived"| cov
+
+  fte --&gt; humanBase["Human cost baseline"]
+  vol --&gt; m3price
+  vol --&gt;|× calls-per-task| m2calls["M2 T2 effective calls"]
+  meanC --&gt;|quoted price builds off mean| m2price["M2 T2 unit price"]
+  m2calls --&gt; m2price
+  p90C --&gt;|true cost basis| m2cost["M2 T2 cost (for margin)"]
+  m2calls --&gt; m2cost
+  p90C --&gt;|true cost basis| m3cost["M3 cost (for margin)"]
+  vol --&gt; m3cost
+
+  overlayN --&gt; m1price["M1 price"] &amp; m2t1price["M2 T1 price"] &amp; m4price["M4 price"]
+  val --&gt; m4price
+  m4price --&gt;|"0.8 × base"| floor["M5 floor"]
+  p90C -.-&gt;|"NOT wired — token-distribution.qmd\nteaches 'set the floor at P90/P95',\nbut M5's floor doesn't use it"| floor
+  floor --&gt; m5price["M5 price (floor/ceiling)"]
+  val --&gt; m5price
+
+  humanBase -.-&gt; sanity["M3 sanity-check warning"]
+  m3price --&gt; sanity
+  vol --&gt; sanity
+
+  m1price &amp; m2t1price &amp; m2price &amp; m2cost &amp; m3price &amp; m3cost &amp; m4price &amp; m5price --&gt; chart["Bar chart: price / cost / profit / margin"]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="zoom-m2-tier-2" class="level2">
+<h2 class="anchored" data-anchor-id="zoom-m2-tier-2">Zoom: M2 Tier 2</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  vol2["Volume (tasks/mo)"] --&gt; calls["Effective calls\n= volume × calls-per-task"]
+  cpt["Calls per task\n(guess — see sensitivity table)"] --&gt; calls
+
+  tok2["Median tokens/call"] --&gt; muC2["log(median cost)"]
+  rate2["Token rate (£/1k tokens)"] --&gt; muC2
+  cov2["Token CoV"] --&gt; sigma2["σ (log-space)"]
+
+  muC2 --&gt; mean2["Mean cost/call"]
+  sigma2 --&gt; mean2
+  muC2 --&gt; p902["P90 cost/call"]
+  sigma2 --&gt; p902
+
+  mean2 --&gt;|"+ allocated overhead, ÷(1-margin), + risk premium"| unitPrice["Unit price (quoted)"]
+  overhead2["Allocated overhead"] --&gt; unitPrice
+  margin2["Target margin (30–50%)"] --&gt; unitPrice
+  riskPrem2["Risk premium/call"] --&gt; unitPrice
+
+  unitPrice --&gt; price2["M2 T2 price\n= calls × unit price"]
+  calls --&gt; price2
+
+  p902 --&gt;|"+ allocated overhead"| costBasis2["Cost basis (P90-based)"]
+  overhead2 --&gt; costBasis2
+  costBasis2 --&gt; cost2["M2 T2 cost\n= calls × cost basis"]
+  calls --&gt; cost2
+
+  price2 --&gt; margin2out["Displayed margin"]
+  cost2 --&gt; margin2out
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="zoom-m3-task" class="level2">
+<h2 class="anchored" data-anchor-id="zoom-m3-task">Zoom: M3 Task</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  hrs3["Hours/task"] --&gt; base3["Hours × rate"]
+  rate3["Hourly rate"] --&gt; base3
+  base3 --&gt;|"× complexity"| complexAdj3["Complexity-adjusted"]
+  complexity3["Complexity multiplier"] --&gt; complexAdj3
+  complexAdj3 --&gt;|"+ risk premium"| taskPrice["M3 task price"]
+  riskPrem3["Risk premium/task"] --&gt; taskPrice
+
+  vol3["Volume (tasks/mo)"] --&gt; price3["M3 price = volume × task price"]
+  taskPrice --&gt; price3
+
+  tok3["Median tokens/task"] --&gt; muC3["log(median cost)"]
+  rate3b["Token rate (£/1k tokens)"] --&gt; muC3
+  cov3["Token CoV"] --&gt; sigma3["σ (log-space)"]
+  muC3 --&gt; p903["P90 cost/task"]
+  sigma3 --&gt; p903
+
+  p903 --&gt; cost3["M3 cost = volume × P90 cost/task"]
+  vol3 --&gt; cost3
+
+  price3 --&gt; margin3out["Displayed margin"]
+  cost3 --&gt; margin3out
+
+  fte3["FTE count × ~160hr"] --&gt; capacity3["Capacity (hours/mo)"]
+  vol3 --&gt; impliedHrs3["Implied hours\n= volume × hours/task"]
+  hrs3 --&gt; impliedHrs3
+  capacity3 --&gt; ratio3["Hours ratio"]
+  impliedHrs3 --&gt; ratio3
+  ratio3 --&gt; warn3["Sanity-check warning\n(if ratio &gt; 1.2 or price &gt; 2× human cost)"]
+  price3 --&gt; warn3
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="known-gaps-dashed-edges-above" class="level2">
+<h2 class="anchored" data-anchor-id="known-gaps-dashed-edges-above">Known gaps (dashed edges above)</h2>
+<p>These are places the model treats inputs as independent when a real pricing conversation probably wouldn’t — flagged here rather than fixed, since each is a judgement call about how much realism this teaching tool needs versus how many more sliders it should have.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Gap</th>
+<th>What’s missing</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Task complexity → Token CoV</td>
+<td><code>m3Complexity</code> scales M3’s <em>price</em>, but has no effect on either model’s token-cost variability, even though a more complex task plausibly has a fatter-tailed token distribution too.</td>
+</tr>
+<tr class="even">
+<td>Risk score → per-unit risk premiums</td>
+<td>The shared <code>riskScore</code> slider drives the generic overlay (M1, M2 T1, M4), but M2 Tier 2 and M3 have their own, entirely independent risk-premium sliders. Moving the shared risk score does nothing to them.</td>
+</tr>
+<tr class="odd">
+<td>Token CoV / P90 → M5’s floor</td>
+<td><code>token-distribution.qmd</code> explicitly teaches “set the floor on the P90/P95 cost, not a flat percentage” — but M5’s actual floor is <code>0.8 × M4 base fee</code>, with no connection to any token-cost distribution at all.</td>
+</tr>
+<tr class="even">
+<td>Deployment tier → default recalibration</td>
+<td>Switching tiers changes which models are <em>shown</em>, but doesn’t adjust any default slider values — a Tier 3 (Digital Labor) scenario and a Tier 1 (Internal Use) scenario keep the same defaults even though the underlying engagement shape is usually very different.</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Agentic AI Pricing Lab · Engineering Academy 2026</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with Quarto + Observable JS</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

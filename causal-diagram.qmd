@@ -1,0 +1,159 @@
+---
+title: "Causal Map"
+subtitle: "How the inputs actually drive cost, price and margin — and where they don't yet, but arguably should"
+---
+
+Every fix in this lab so far has come from tracing a chain of dependencies that wasn't
+visible until something broke: volume meaning different things for different models, a
+mean-based price sitting next to a P90-based cost, a "risk score" that only touches three
+of the five models. This page draws that map out up front.
+
+::: {.callout-note}
+## Reading the diagrams
+**Solid arrows** are real dependencies — implemented in `comparator.qmd`'s code today, and
+you can move the corresponding slider and watch the number change. **Dashed arrows** are
+*conceptual* links — relationships that plausibly should exist given how the reference doc
+and the rest of this site talk about risk and variability, but which the model currently
+treats as independent sliders. They're flagged here as a map of where the model is
+simplified, not a defect list.
+:::
+
+## Master diagram
+
+```{mermaid}
+flowchart TB
+  subgraph EXT["External / qualitative drivers (upstream of the sliders)"]
+    complexity["Task / workflow complexity"]
+    autonomyQ["Autonomy level (L1–L5)"]
+    riskQ["Risk score (1–10)"]
+    tier["Deployment tier (1 / 2 / 3)"]
+  end
+
+  subgraph SHARED["Shared engagement inputs"]
+    fte["FTE count × FTE cost\n→ human baseline (£/mo)"]
+    vol["Volume (tasks delivered/mo)"]
+    val["Business value created (£/mo)"]
+  end
+
+  subgraph TOKENS["Token-cost model (M2 T2 and M3, independently parameterised)"]
+    cov["Token CoV\n(variability)"]
+    meanC["Mean token cost"]
+    p90C["P90 token cost (tail)"]
+    cov --> meanC
+    cov --> p90C
+  end
+
+  tier -->|filters which models show| models["Active models (§5.4 mapping)"]
+  tier -->|picks M2's formula| m2choice["M2 Tier 1 (flat) vs Tier 2 (per-call)"]
+
+  riskQ -->|overlay: +5%..+100%| overlayN["overlay() — M1, M2 T1, M4 only"]
+  autonomyQ -->|×1.0 / ×1.2 / ×1.4| overlayN
+  riskQ -.->|"NOT wired — M2 T2 & M3 have their\nown independent risk-premium sliders"| ownRisk["M2 T2 / M3 risk premium"]
+
+  complexity -->|m3Complexity multiplier| m3price["M3 task price"]
+  complexity -.->|"NOT wired — CoV is set\nindependently, not derived"| cov
+
+  fte --> humanBase["Human cost baseline"]
+  vol --> m3price
+  vol -->|× calls-per-task| m2calls["M2 T2 effective calls"]
+  meanC -->|quoted price builds off mean| m2price["M2 T2 unit price"]
+  m2calls --> m2price
+  p90C -->|true cost basis| m2cost["M2 T2 cost (for margin)"]
+  m2calls --> m2cost
+  p90C -->|true cost basis| m3cost["M3 cost (for margin)"]
+  vol --> m3cost
+
+  overlayN --> m1price["M1 price"] & m2t1price["M2 T1 price"] & m4price["M4 price"]
+  val --> m4price
+  m4price -->|"0.8 × base"| floor["M5 floor"]
+  p90C -.->|"NOT wired — token-distribution.qmd\nteaches 'set the floor at P90/P95',\nbut M5's floor doesn't use it"| floor
+  floor --> m5price["M5 price (floor/ceiling)"]
+  val --> m5price
+
+  humanBase -.-> sanity["M3 sanity-check warning"]
+  m3price --> sanity
+  vol --> sanity
+
+  m1price & m2t1price & m2price & m2cost & m3price & m3cost & m4price & m5price --> chart["Bar chart: price / cost / profit / margin"]
+```
+
+## Zoom: M2 Tier 2
+
+```{mermaid}
+flowchart LR
+  vol2["Volume (tasks/mo)"] --> calls["Effective calls\n= volume × calls-per-task"]
+  cpt["Calls per task\n(guess — see sensitivity table)"] --> calls
+
+  tok2["Median tokens/call"] --> muC2["log(median cost)"]
+  rate2["Token rate (£/1k tokens)"] --> muC2
+  cov2["Token CoV"] --> sigma2["σ (log-space)"]
+
+  muC2 --> mean2["Mean cost/call"]
+  sigma2 --> mean2
+  muC2 --> p902["P90 cost/call"]
+  sigma2 --> p902
+
+  mean2 -->|"+ allocated overhead, ÷(1-margin), + risk premium"| unitPrice["Unit price (quoted)"]
+  overhead2["Allocated overhead"] --> unitPrice
+  margin2["Target margin (30–50%)"] --> unitPrice
+  riskPrem2["Risk premium/call"] --> unitPrice
+
+  unitPrice --> price2["M2 T2 price\n= calls × unit price"]
+  calls --> price2
+
+  p902 -->|"+ allocated overhead"| costBasis2["Cost basis (P90-based)"]
+  overhead2 --> costBasis2
+  costBasis2 --> cost2["M2 T2 cost\n= calls × cost basis"]
+  calls --> cost2
+
+  price2 --> margin2out["Displayed margin"]
+  cost2 --> margin2out
+```
+
+## Zoom: M3 Task
+
+```{mermaid}
+flowchart LR
+  hrs3["Hours/task"] --> base3["Hours × rate"]
+  rate3["Hourly rate"] --> base3
+  base3 -->|"× complexity"| complexAdj3["Complexity-adjusted"]
+  complexity3["Complexity multiplier"] --> complexAdj3
+  complexAdj3 -->|"+ risk premium"| taskPrice["M3 task price"]
+  riskPrem3["Risk premium/task"] --> taskPrice
+
+  vol3["Volume (tasks/mo)"] --> price3["M3 price = volume × task price"]
+  taskPrice --> price3
+
+  tok3["Median tokens/task"] --> muC3["log(median cost)"]
+  rate3b["Token rate (£/1k tokens)"] --> muC3
+  cov3["Token CoV"] --> sigma3["σ (log-space)"]
+  muC3 --> p903["P90 cost/task"]
+  sigma3 --> p903
+
+  p903 --> cost3["M3 cost = volume × P90 cost/task"]
+  vol3 --> cost3
+
+  price3 --> margin3out["Displayed margin"]
+  cost3 --> margin3out
+
+  fte3["FTE count × ~160hr"] --> capacity3["Capacity (hours/mo)"]
+  vol3 --> impliedHrs3["Implied hours\n= volume × hours/task"]
+  hrs3 --> impliedHrs3
+  capacity3 --> ratio3["Hours ratio"]
+  impliedHrs3 --> ratio3
+  ratio3 --> warn3["Sanity-check warning\n(if ratio > 1.2 or price > 2× human cost)"]
+  price3 --> warn3
+```
+
+## Known gaps (dashed edges above)
+
+These are places the model treats inputs as independent when a real pricing conversation
+probably wouldn't — flagged here rather than fixed, since each is a judgement call about
+how much realism this teaching tool needs versus how many more sliders it should have.
+
+| Gap | What's missing |
+|---|---|
+| Task complexity → Token CoV | `m3Complexity` scales M3's *price*, but has no effect on either model's token-cost variability, even though a more complex task plausibly has a fatter-tailed token distribution too. |
+| Risk score → per-unit risk premiums | The shared `riskScore` slider drives the generic overlay (M1, M2 T1, M4), but M2 Tier 2 and M3 have their own, entirely independent risk-premium sliders. Moving the shared risk score does nothing to them. |
+| Token CoV / P90 → M5's floor | `token-distribution.qmd` explicitly teaches "set the floor on the P90/P95 cost, not a flat percentage" — but M5's actual floor is `0.8 × M4 base fee`, with no connection to any token-cost distribution at all. |
+| Deployment tier → default recalibration | Switching tiers changes which models are *shown*, but doesn't adjust any default slider values — a Tier 3 (Digital Labor) scenario and a Tier 1 (Internal Use) scenario keep the same defaults even though the underlying engagement shape is usually very different. |

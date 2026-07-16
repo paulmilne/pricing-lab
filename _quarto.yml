@@ -20,6 +20,8 @@ website:
         text: "Token Distribution"
       - href: outcome-designer.qmd
         text: "M5 Outcome Designer"
+      - href: causal-diagram.qmd
+        text: "Causal Map"
   page-footer:
     left: "Agentic AI Pricing Lab · Engineering Academy 2026"
     right: "Built with Quarto + Observable JS"
