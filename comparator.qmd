@@ -252,6 +252,42 @@ m2ComputeCostP90  = Math.exp(m2TokenMuC + Z90 * m2TokenSigma)
 // sensitivity tables further down the page can reference them too.
 m3TaskPrice = (m3Hours * m3Rate) * m3Complexity + m3RiskPrem
 m2UnitPrice = (m2ComputeCostMean + m2AllocOverhead) / (1 - m2T2Margin) + m2T2RiskPrem
+m2EffectiveCalls = volume * m2CallsPerTask
+
+// A per-model breakdown of *why* the cost line is what it is — each model's
+// cost comes from a genuinely different formula (see the Causal Map), so
+// this can't be one fixed set of line items; it switches on which model is
+// being hovered.
+costBreakdown = (model) => {
+  if (model === "M2 Usage" && !isM2Tier1) {
+    return [
+      ["P90 compute cost", `${gbpUnit(m2ComputeCostP90)}/call × ${m2EffectiveCalls.toLocaleString()} calls`, m2ComputeCostP90 * m2EffectiveCalls],
+      ["Allocated overhead", `${gbpUnit(m2AllocOverhead)}/call × ${m2EffectiveCalls.toLocaleString()} calls`, m2AllocOverhead * m2EffectiveCalls],
+    ];
+  }
+  if (model === "M3 Task") {
+    return [
+      ["P90 compute cost", `${gbpUnit(m3ComputeCostP90)}/task × ${volume.toLocaleString()} tasks`, m3ComputeCostP90 * volume],
+    ];
+  }
+  // M1, M2 Tier 1, M4, M5 all share the Tier 1 cost-recovery breakdown.
+  return [
+    ["Infrastructure", "compute + storage + network", m2Infra],
+    ["License", "vendor fees per agent/API call", m2License],
+    ["Support", "CoE FTE allocation", m2Support],
+    ["CoE overhead", "governance, training, monitoring", m2CoEOverhead],
+    ["Risk reserve", `${(m2RiskRate * 100).toFixed(0)}% of the above`, m2RiskReserve],
+  ];
+}
+// Plot's tip truncates each channel to a fixed character width regardless
+// of content, so one long joined string (or embedded newlines) doesn't
+// work — split into several short, fixed-key rows instead. Pack two cost
+// items per row where there are enough to make that worthwhile.
+costBreakdownRows = (model) => {
+  const items = costBreakdown(model).map(([label, , amount]) => `${label} ${gbp(amount)}`);
+  while (items.length < 5) items.push("");
+  return items;
+}
 
 prices = {
   const m1 = overlay(fteCount * (fteCost / 12) * seatDiscount);
@@ -269,7 +305,6 @@ prices = {
   // quoted price builds off the MEAN token cost (m2UnitPrice, computed at
   // top level — standard cost-plus practice), but the true cost basis below
   // uses the P90 tail cost instead, same tail-risk lesson as M3.
-  const m2EffectiveCalls = volume * m2CallsPerTask;
   const m2Tier2Price = m2EffectiveCalls * m2UnitPrice;
   const m2Tier2Cost  = (m2ComputeCostP90 + m2AllocOverhead) * m2EffectiveCalls;
 
@@ -401,6 +436,11 @@ Plot.plot({
               "Profit":       (d) => gbp(priceByModel.get(d.model).profit),
               "Margin":       (d) => `${(priceByModel.get(d.model).marginPct * 100).toFixed(0)}%`,
               "Basis":        (d) => priceByModel.get(d.model).note,
+              "Cost 1": (d) => costBreakdownRows(d.model)[0],
+              "Cost 2": (d) => costBreakdownRows(d.model)[1],
+              "Cost 3": (d) => costBreakdownRows(d.model)[2],
+              "Cost 4": (d) => costBreakdownRows(d.model)[3],
+              "Cost 5": (d) => costBreakdownRows(d.model)[4],
             }}}),
     // In-segment £ breakdown — dark text on the grey cost segment, white
     // text on the teal profit segment, each only shown if its slice is
@@ -416,6 +456,11 @@ Plot.plot({
                "Profit":      (d) => gbp(priceByModel.get(d.model).profit),
                "Margin":      (d) => `${(priceByModel.get(d.model).marginPct * 100).toFixed(0)}%`,
                "Basis":       (d) => priceByModel.get(d.model).note,
+               "Cost 1": (d) => costBreakdownRows(d.model)[0],
+              "Cost 2": (d) => costBreakdownRows(d.model)[1],
+              "Cost 3": (d) => costBreakdownRows(d.model)[2],
+              "Cost 4": (d) => costBreakdownRows(d.model)[3],
+              "Cost 5": (d) => costBreakdownRows(d.model)[4],
              }}}),
     Plot.text(segments.filter(d => d.segment === "Profit" && (d.y2 - d.y1) > minLabelHeight),
       {x: "model", y: (d) => (d.y1 + d.y2) / 2, text: (d) => gbp(d.y2 - d.y1),
@@ -427,6 +472,11 @@ Plot.plot({
                "Profit":      (d) => gbp(priceByModel.get(d.model).profit),
                "Margin":      (d) => `${(priceByModel.get(d.model).marginPct * 100).toFixed(0)}%`,
                "Basis":       (d) => priceByModel.get(d.model).note,
+               "Cost 1": (d) => costBreakdownRows(d.model)[0],
+              "Cost 2": (d) => costBreakdownRows(d.model)[1],
+              "Cost 3": (d) => costBreakdownRows(d.model)[2],
+              "Cost 4": (d) => costBreakdownRows(d.model)[3],
+              "Cost 5": (d) => costBreakdownRows(d.model)[4],
              }}}),
     // Hovering the price or margin label above the bar shows the full
     // breakdown — these sit outside the bar itself, so they need their own
@@ -440,6 +490,11 @@ Plot.plot({
               "Profit":      (d) => gbp(d.profit),
               "Margin":      (d) => `${(d.marginPct * 100).toFixed(0)}%`,
               "Basis":       (d) => d.note,
+              "Cost 1": (d) => costBreakdownRows(d.model)[0],
+              "Cost 2": (d) => costBreakdownRows(d.model)[1],
+              "Cost 3": (d) => costBreakdownRows(d.model)[2],
+              "Cost 4": (d) => costBreakdownRows(d.model)[3],
+              "Cost 5": (d) => costBreakdownRows(d.model)[4],
             }}}),
     Plot.text(prices, {x: "model", y: "price",
       text: (d) => `${(d.marginPct * 100).toFixed(0)}% margin`,
@@ -451,6 +506,11 @@ Plot.plot({
               "Profit":      (d) => gbp(d.profit),
               "Margin":      (d) => `${(d.marginPct * 100).toFixed(0)}%`,
               "Basis":       (d) => d.note,
+              "Cost 1": (d) => costBreakdownRows(d.model)[0],
+              "Cost 2": (d) => costBreakdownRows(d.model)[1],
+              "Cost 3": (d) => costBreakdownRows(d.model)[2],
+              "Cost 4": (d) => costBreakdownRows(d.model)[3],
+              "Cost 5": (d) => costBreakdownRows(d.model)[4],
             }}}),
     Plot.ruleY([humanMonthly], {stroke: "#00005C", strokeWidth: 2, strokeDasharray: "5 4"}),
     Plot.text([`Human cost today  ·  ${gbp(humanMonthly)}/mo`],
