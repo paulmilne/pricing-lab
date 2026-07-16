@@ -131,7 +131,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#master-diagram" id="toc-master-diagram" class="nav-link active" data-scroll-target="#master-diagram">Master diagram</a></li>
+  <li><a href="#inputs-drivers" id="toc-inputs-drivers" class="nav-link active" data-scroll-target="#inputs-drivers">Inputs &amp; drivers</a></li>
+  <li><a href="#from-drivers-to-price-cost-margin" id="toc-from-drivers-to-price-cost-margin" class="nav-link" data-scroll-target="#from-drivers-to-price-cost-margin">From drivers to price, cost &amp; margin</a></li>
   <li><a href="#zoom-m2-tier-2" id="toc-zoom-m2-tier-2" class="nav-link" data-scroll-target="#zoom-m2-tier-2">Zoom: M2 Tier 2</a></li>
   <li><a href="#zoom-m3-task" id="toc-zoom-m3-task" class="nav-link" data-scroll-target="#zoom-m3-task">Zoom: M3 Task</a></li>
   <li><a href="#known-gaps-dashed-edges-above" id="toc-known-gaps-dashed-edges-above" class="nav-link" data-scroll-target="#known-gaps-dashed-edges-above">Known gaps (dashed edges above)</a></li>
@@ -161,6 +162,22 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<style>
+/* Quarto injects a global theme override (mermaid-init.js) that recolors
+   subgraph backgrounds via --mermaid-fg-color--lightest, a dark grey — it
+   loads after each diagram's own theme and wins by cascade order regardless
+   of themeVariables set in the diagram itself. Force it back to something
+   legible with !important. */
+svg[id^="mermaid"] .cluster rect {
+  fill: #f5f7fa !important;
+  stroke: #9fb3c8 !important;
+}
+svg[id^="mermaid"] .cluster text,
+svg[id^="mermaid"] .cluster span {
+  fill: #000 !important;
+  color: #000 !important;
+}
+</style>
 <p>Every fix in this lab so far has come from tracing a chain of dependencies that wasn’t visible until something broke: volume meaning different things for different models, a mean-based price sitting next to a P90-based cost, a “risk score” that only touches three of the five models. This page draws that map out up front.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -175,67 +192,86 @@ Reading the diagrams
 <p><strong>Solid arrows</strong> are real dependencies — implemented in <code>comparator.qmd</code>’s code today, and you can move the corresponding slider and watch the number change. <strong>Dashed arrows</strong> are <em>conceptual</em> links — relationships that plausibly should exist given how the reference doc and the rest of this site talk about risk and variability, but which the model currently treats as independent sliders. They’re flagged here as a map of where the model is simplified, not a defect list.</p>
 </div>
 </div>
-<section id="master-diagram" class="level2">
-<h2 class="anchored" data-anchor-id="master-diagram">Master diagram</h2>
+<p>The full picture was one dense diagram; it’s split into two smaller ones below — <strong>drivers</strong> (the qualitative/shared inputs) and <strong>computation</strong> (how those drivers turn into price, cost and margin) — so each stays readable on its own.</p>
+<section id="inputs-drivers" class="level2">
+<h2 class="anchored" data-anchor-id="inputs-drivers">Inputs &amp; drivers</h2>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
 <div>
 <p></p><figure class="figure"><p></p>
 <div>
-<pre class="mermaid mermaid-js">flowchart TB
-  subgraph EXT["External / qualitative drivers (upstream of the sliders)"]
-    complexity["Task / workflow complexity"]
-    autonomyQ["Autonomy level (L1–L5)"]
-    riskQ["Risk score (1–10)"]
-    tier["Deployment tier (1 / 2 / 3)"]
+<pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "clusterBkg": "#f5f7fa", "clusterBorder": "#9fb3c8", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 35, "rankSpacing": 55}}}%%
+flowchart TB
+  subgraph EXT["External / qualitative drivers"]
+    complexity["Task / workflow&lt;br/&gt;complexity"]
+    autonomyQ["Autonomy level&lt;br/&gt;(L1–L5)"]
+    riskQ["Risk score&lt;br/&gt;(1–10)"]
+    tier["Deployment tier&lt;br/&gt;(1 / 2 / 3)"]
   end
 
   subgraph SHARED["Shared engagement inputs"]
-    fte["FTE count × FTE cost\n→ human baseline (£/mo)"]
-    vol["Volume (tasks delivered/mo)"]
-    val["Business value created (£/mo)"]
+    fte["FTE count × FTE cost"]
+    vol["Volume&lt;br/&gt;(tasks delivered/mo)"]
+    val["Business value&lt;br/&gt;created (£/mo)"]
   end
 
-  subgraph TOKENS["Token-cost model (M2 T2 and M3, independently parameterised)"]
-    cov["Token CoV\n(variability)"]
+  subgraph TOKENS["Token-cost model&lt;br/&gt;(M2 T2 &amp; M3, set independently)"]
+    cov["Token CoV"]
     meanC["Mean token cost"]
-    p90C["P90 token cost (tail)"]
+    p90C["P90 token cost"]
     cov --&gt; meanC
     cov --&gt; p90C
   end
 
-  tier --&gt;|filters which models show| models["Active models (§5.4 mapping)"]
-  tier --&gt;|picks M2's formula| m2choice["M2 Tier 1 (flat) vs Tier 2 (per-call)"]
+  tier --&gt;|filters models| models["Active models&lt;br/&gt;(§5.4 mapping)"]
+  tier --&gt;|picks formula| m2choice["M2: Tier 1 vs Tier 2"]
 
-  riskQ --&gt;|overlay: +5%..+100%| overlayN["overlay() — M1, M2 T1, M4 only"]
-  autonomyQ --&gt;|×1.0 / ×1.2 / ×1.4| overlayN
-  riskQ -.-&gt;|"NOT wired — M2 T2 &amp; M3 have their\nown independent risk-premium sliders"| ownRisk["M2 T2 / M3 risk premium"]
+  riskQ --&gt; overlayN["overlay()&lt;br/&gt;M1, M2 T1, M4 only"]
+  autonomyQ --&gt; overlayN
+  riskQ -.-&gt;|not wired| ownRisk["M2 T2 / M3&lt;br/&gt;risk premium"]
 
-  complexity --&gt;|m3Complexity multiplier| m3price["M3 task price"]
-  complexity -.-&gt;|"NOT wired — CoV is set\nindependently, not derived"| cov
+  complexity --&gt;|m3Complexity| m3priceIn["feeds M3 price"]
+  complexity -.-&gt;|not wired| cov
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="from-drivers-to-price-cost-margin" class="level2">
+<h2 class="anchored" data-anchor-id="from-drivers-to-price-cost-margin">From drivers to price, cost &amp; margin</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 35, "rankSpacing": 55}}}%%
+flowchart TB
+  overlayN2["overlay() output"] --&gt; m1price["M1 price"]
+  overlayN2 --&gt; m2t1price["M2 T1 price"]
+  overlayN2 --&gt; m4price["M4 price"]
 
-  fte --&gt; humanBase["Human cost baseline"]
-  vol --&gt; m3price
-  vol --&gt;|× calls-per-task| m2calls["M2 T2 effective calls"]
-  meanC --&gt;|quoted price builds off mean| m2price["M2 T2 unit price"]
-  m2calls --&gt; m2price
-  p90C --&gt;|true cost basis| m2cost["M2 T2 cost (for margin)"]
-  m2calls --&gt; m2cost
-  p90C --&gt;|true cost basis| m3cost["M3 cost (for margin)"]
-  vol --&gt; m3cost
+  vol2["Volume"] --&gt; m3price2["M3 price&lt;br/&gt;= volume × task price"]
+  vol2 --&gt;|"× calls/task"| m2calls["M2 T2&lt;br/&gt;effective calls"]
+  meanC2["Mean token cost"] --&gt; m2price2["M2 T2 unit price&lt;br/&gt;(quoted)"]
+  m2calls --&gt; m2price2
+  p90C2["P90 token cost"] --&gt; m2cost2["M2 T2 cost&lt;br/&gt;(for margin)"]
+  m2calls --&gt; m2cost2
+  p90C2 --&gt; m3cost2["M3 cost&lt;br/&gt;(for margin)"]
+  vol2 --&gt; m3cost2
 
-  overlayN --&gt; m1price["M1 price"] &amp; m2t1price["M2 T1 price"] &amp; m4price["M4 price"]
-  val --&gt; m4price
-  m4price --&gt;|"0.8 × base"| floor["M5 floor"]
-  p90C -.-&gt;|"NOT wired — token-distribution.qmd\nteaches 'set the floor at P90/P95',\nbut M5's floor doesn't use it"| floor
-  floor --&gt; m5price["M5 price (floor/ceiling)"]
-  val --&gt; m5price
+  val2["Business value"] --&gt; m4price
+  m4price --&gt;|"0.8 × base"| floor2["M5 floor"]
+  p90C2 -.-&gt;|"not wired — see gap below"| floor2
+  floor2 --&gt; m5price2["M5 price"]
+  val2 --&gt; m5price2
 
-  humanBase -.-&gt; sanity["M3 sanity-check warning"]
-  m3price --&gt; sanity
-  vol --&gt; sanity
+  humanBase2["Human cost baseline"] -.-&gt; sanity2["M3 sanity check"]
+  m3price2 --&gt; sanity2
+  vol2 --&gt; sanity2
 
-  m1price &amp; m2t1price &amp; m2price &amp; m2cost &amp; m3price &amp; m3cost &amp; m4price &amp; m5price --&gt; chart["Bar chart: price / cost / profit / margin"]
+  m1price &amp; m2t1price &amp; m2price2 &amp; m2cost2 &amp; m3price2 &amp; m3cost2 &amp; m4price &amp; m5price2 --&gt; chart2["Bar chart:&lt;br/&gt;price / cost / profit / margin"]
 </pre>
 </div>
 <p></p></figure><p></p>
@@ -250,7 +286,8 @@ Reading the diagrams
 <div>
 <p></p><figure class="figure"><p></p>
 <div>
-<pre class="mermaid mermaid-js">flowchart LR
+<pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 30, "rankSpacing": 50}}}%%
+flowchart LR
   vol2["Volume (tasks/mo)"] --&gt; calls["Effective calls\n= volume × calls-per-task"]
   cpt["Calls per task\n(guess — see sensitivity table)"] --&gt; calls
 
@@ -292,7 +329,8 @@ Reading the diagrams
 <div>
 <p></p><figure class="figure"><p></p>
 <div>
-<pre class="mermaid mermaid-js">flowchart LR
+<pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 30, "rankSpacing": 50}}}%%
+flowchart LR
   hrs3["Hours/task"] --&gt; base3["Hours × rate"]
   rate3["Hourly rate"] --&gt; base3
   base3 --&gt;|"× complexity"| complexAdj3["Complexity-adjusted"]
