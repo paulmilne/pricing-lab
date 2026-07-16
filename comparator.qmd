@@ -117,7 +117,13 @@ viewof m2Margin     = Inputs.range([0, 0.20],    {value: 0.15, step: 0.01, label
 // models describe the same underlying workload, instead of comparing 1,000
 // calls against 1,000 tasks as if they were the same amount of work.
 viewof m2CallsPerTask  = Inputs.range([1, 100],      {value: 20,   step: 1,    label: "M2 T2 · API calls per task (links volume to M3)"})
-viewof m2MedianTokens  = Inputs.range([100, 20000],  {value: 3000, step: 100,  label: "M2 T2 · median tokens per call"})
+// Recalibrated down from 3,000: at 20,000 effective calls/mo (volume ×
+// calls-per-task), 3,000 tokens/call compounded a ~£3.77/call price into a
+// £75,000/mo total — far more than M3's £21,500 for the same workload. A
+// single call is a much smaller unit of work than a whole task, so its
+// token footprint (and the margin/overhead layered on top of it) needs to
+// be proportionately smaller too.
+viewof m2MedianTokens  = Inputs.range([100, 20000],  {value: 650,  step: 50,   label: "M2 T2 · median tokens per call"})
 viewof m2TokenRate     = Inputs.range([0.05, 2.00],  {value: 0.50, step: 0.05, label: "M2 T2 · token rate (£ per 1,000 tokens)"})
 viewof m2TokenCoV      = Inputs.range([0.2, 1.5],    {value: 0.7,  step: 0.05, label: "M2 T2 · token cost variability (CoV)"})
 viewof m2AllocOverhead = Inputs.range([0.01, 1], {value: 0.05, step: 0.01, label: "M2 T2 · allocated overhead (£/call — support+CoE+sales+marketing ÷ expected volume)"})
