@@ -115,7 +115,11 @@ viewof m2MedianTokens  = Inputs.range([100, 20000],  {value: 3000, step: 100,  l
 viewof m2TokenRate     = Inputs.range([0.05, 2.00],  {value: 0.50, step: 0.05, label: "M2 T2 · token rate (£ per 1,000 tokens)"})
 viewof m2TokenCoV      = Inputs.range([0.2, 1.5],    {value: 0.7,  step: 0.05, label: "M2 T2 · token cost variability (CoV)"})
 viewof m2AllocOverhead = Inputs.range([0.01, 1], {value: 0.05, step: 0.01, label: "M2 T2 · allocated overhead (£/call — support+CoE+sales+marketing ÷ expected volume)"})
-viewof m2T2Margin   = Inputs.range([0.30, 0.50], {value: 0.40, step: 0.01, label: "M2 T2 · target margin (30–50%)"})
+// Default nudged to the top of the range (0.50) so the out-of-the-box view
+// isn't already showing a loss once P90 tail cost is accounted for — see
+// the M2 Tier 2 sensitivity callout below for why mean-based pricing here
+// runs this close to the edge in the first place.
+viewof m2T2Margin   = Inputs.range([0.30, 0.50], {value: 0.50, step: 0.01, label: "M2 T2 · target margin (30–50%)"})
 viewof m3Hours      = Inputs.range([0.1, 8],     {value: 1,    step: 0.1,  label: "M3 · estimated hours per task"})
 viewof m3Rate       = Inputs.range([15, 100],    {value: 40,   step: 5,    label: "M3 · hourly rate (£/hr)"})
 viewof m3Complexity = Inputs.range([1.0, 2.0],   {value: 1.2,  step: 0.1,  label: "M3 · complexity multiplier"})
