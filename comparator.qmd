@@ -377,6 +377,9 @@ activeModels.includes("M3 Task") && (m3HoursRatio > 1.2 || m3PriceRatio > 2)
 // would be too cramped to read (so we skip it rather than overlap text).
 chartYMax = Math.max(...prices.map(d => d.price)) * 1.22
 minLabelHeight = chartYMax * 0.055
+// segments only carry {model, segment, y1, y2} — this looks back up the
+// full price/cost/profit/margin/note for whichever model a tip is hovering.
+priceByModel = new Map(prices.map(d => [d.model, d]))
 
 Plot.plot({
   marginLeft: 70,
@@ -390,22 +393,65 @@ Plot.plot({
   color: {domain: ["Vendor cost", "Profit"], range: costProfitPalette, legend: true},
   marks: [
     Plot.barY(segments, {x: "model", y1: "y1", y2: "y2", fill: "segment",
-      tip: {format: {y1: false, y2: false, fill: false},
-            channels: {"£/mo": (d) => gbp(d.y2 - d.y1)}}}),
+      tip: {format: {y1: false, y2: false, fill: false, model: false},
+            channels: {
+              "Segment £/mo": (d) => gbp(d.y2 - d.y1),
+              "Price":        (d) => gbp(priceByModel.get(d.model).price),
+              "Vendor cost":  (d) => gbp(priceByModel.get(d.model).cost),
+              "Profit":       (d) => gbp(priceByModel.get(d.model).profit),
+              "Margin":       (d) => `${(priceByModel.get(d.model).marginPct * 100).toFixed(0)}%`,
+              "Basis":        (d) => priceByModel.get(d.model).note,
+            }}}),
     // In-segment £ breakdown — dark text on the grey cost segment, white
     // text on the teal profit segment, each only shown if its slice is
-    // tall enough to hold the label legibly.
+    // tall enough to hold the label legibly. Same rich tip as the bar
+    // itself, so hovering the number directly works too.
     Plot.text(segments.filter(d => d.segment === "Vendor cost" && (d.y2 - d.y1) > minLabelHeight),
       {x: "model", y: (d) => (d.y1 + d.y2) / 2, text: (d) => gbp(d.y2 - d.y1),
-       fill: "#222", fontSize: 11, fontWeight: 600}),
+       fill: "#222", fontSize: 11, fontWeight: 600,
+       tip: {format: {x: false, y: false, text: false},
+             channels: {
+               "Price":       (d) => gbp(priceByModel.get(d.model).price),
+               "Vendor cost": (d) => gbp(priceByModel.get(d.model).cost),
+               "Profit":      (d) => gbp(priceByModel.get(d.model).profit),
+               "Margin":      (d) => `${(priceByModel.get(d.model).marginPct * 100).toFixed(0)}%`,
+               "Basis":       (d) => priceByModel.get(d.model).note,
+             }}}),
     Plot.text(segments.filter(d => d.segment === "Profit" && (d.y2 - d.y1) > minLabelHeight),
       {x: "model", y: (d) => (d.y1 + d.y2) / 2, text: (d) => gbp(d.y2 - d.y1),
-       fill: "white", fontSize: 11, fontWeight: 600}),
+       fill: "white", fontSize: 11, fontWeight: 600,
+       tip: {format: {x: false, y: false, text: false},
+             channels: {
+               "Price":       (d) => gbp(priceByModel.get(d.model).price),
+               "Vendor cost": (d) => gbp(priceByModel.get(d.model).cost),
+               "Profit":      (d) => gbp(priceByModel.get(d.model).profit),
+               "Margin":      (d) => `${(priceByModel.get(d.model).marginPct * 100).toFixed(0)}%`,
+               "Basis":       (d) => priceByModel.get(d.model).note,
+             }}}),
+    // Hovering the price or margin label above the bar shows the full
+    // breakdown — these sit outside the bar itself, so they need their own
+    // tip config rather than relying on the barY segment's tooltip below.
     Plot.text(prices, {x: "model", y: "price", text: (d) => gbp(d.price),
-      dy: -8, fontWeight: "bold"}),
+      dy: -8, fontWeight: "bold",
+      tip: {format: {x: false, y: false, text: false},
+            channels: {
+              "Price":       (d) => gbp(d.price),
+              "Vendor cost": (d) => gbp(d.cost),
+              "Profit":      (d) => gbp(d.profit),
+              "Margin":      (d) => `${(d.marginPct * 100).toFixed(0)}%`,
+              "Basis":       (d) => d.note,
+            }}}),
     Plot.text(prices, {x: "model", y: "price",
       text: (d) => `${(d.marginPct * 100).toFixed(0)}% margin`,
-      dy: -22, fontSize: 11, fill: "#555"}),
+      dy: -22, fontSize: 11, fill: "#555",
+      tip: {format: {x: false, y: false, text: false},
+            channels: {
+              "Price":       (d) => gbp(d.price),
+              "Vendor cost": (d) => gbp(d.cost),
+              "Profit":      (d) => gbp(d.profit),
+              "Margin":      (d) => `${(d.marginPct * 100).toFixed(0)}%`,
+              "Basis":       (d) => d.note,
+            }}}),
     Plot.ruleY([humanMonthly], {stroke: "#00005C", strokeWidth: 2, strokeDasharray: "5 4"}),
     Plot.text([`Human cost today  ·  ${gbp(humanMonthly)}/mo`],
       {frameAnchor: "top-right", dx: -6, dy: 8, fill: "#00005C", fontWeight: "bold"}),
