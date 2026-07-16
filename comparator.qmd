@@ -104,7 +104,16 @@ viewof m2Margin     = Inputs.range([0, 0.20],    {value: 0.15, step: 0.01, label
 
 // M2 · Tier 2 platform-usage formula (CoE reference doc):
 // Price per Unit = [(Unit Cost + Allocated Overhead) / (1 - Margin)] + Risk Premium
-viewof m2UnitCost   = Inputs.range([0.01, 2],    {value: 0.10, step: 0.01, label: "M2 T2 · unit cost (£/call — infra + license)"})
+//
+// "Unit cost" (infra + license per call) is fundamentally a token cost too —
+// same flat-guess problem M3 had. Modelled the same way: log-normal tokens
+// per call (median + CoV). The quoted price still builds off the MEAN cost
+// (standard cost-plus practice — you can't quote off a percentile), but the
+// vendor's true cost used for the margin/profit chart is the P90, same
+// tail-risk lesson as M3 and token-distribution.qmd.
+viewof m2MedianTokens  = Inputs.range([100, 20000],  {value: 3000, step: 100,  label: "M2 T2 · median tokens per call"})
+viewof m2TokenRate     = Inputs.range([0.05, 2.00],  {value: 0.50, step: 0.05, label: "M2 T2 · token rate (£ per 1,000 tokens)"})
+viewof m2TokenCoV      = Inputs.range([0.2, 1.5],    {value: 0.7,  step: 0.05, label: "M2 T2 · token cost variability (CoV)"})
 viewof m2AllocOverhead = Inputs.range([0.01, 1], {value: 0.05, step: 0.01, label: "M2 T2 · allocated overhead (£/call — support+CoE+sales+marketing ÷ expected volume)"})
 viewof m2T2Margin   = Inputs.range([0.30, 0.50], {value: 0.40, step: 0.01, label: "M2 T2 · target margin (30–50%)"})
 viewof m3Hours      = Inputs.range([0.1, 8],     {value: 1,    step: 0.1,  label: "M3 · estimated hours per task"})
@@ -194,9 +203,18 @@ m3TokenMuC     = Math.log(m3MedianTokens) + Math.log(m3TokenRate / 1000)
 m3ComputeCostMean = Math.exp(m3TokenMuC + m3TokenSigma ** 2 / 2)
 m3ComputeCostP90  = Math.exp(m3TokenMuC + Z90 * m3TokenSigma)
 
+// M2 Tier 2's "unit cost" (infra + license per call) is the same kind of
+// token cost, same log-normal treatment — just at per-call rather than
+// per-task scale.
+m2TokenSigma   = Math.sqrt(Math.log(1 + m2TokenCoV ** 2))
+m2TokenMuC     = Math.log(m2MedianTokens) + Math.log(m2TokenRate / 1000)
+m2ComputeCostMean = Math.exp(m2TokenMuC + m2TokenSigma ** 2 / 2)
+m2ComputeCostP90  = Math.exp(m2TokenMuC + Z90 * m2TokenSigma)
+
 // Exposed at top level (not just inside the `prices` cell below) so the
-// sensitivity tables further down the page can reference it too.
+// sensitivity tables further down the page can reference them too.
 m3TaskPrice = (m3Hours * m3Rate) * m3Complexity + m3RiskPrem
+m2UnitPrice = (m2ComputeCostMean + m2AllocOverhead) / (1 - m2T2Margin) + m2T2RiskPrem
 
 prices = {
   const m1 = overlay(fteCount * (fteCost / 12) * seatDiscount);
@@ -208,14 +226,11 @@ prices = {
   // M2 · Tier 2: platform usage, priced and billed per unit, scaling with
   // volume. Skips the generic overlay — like M3, its own per-unit risk
   // premium already prices that in, so applying both would double-count it.
-  const m2UnitPrice  = (m2UnitCost + m2AllocOverhead) / (1 - m2T2Margin) + m2T2RiskPrem;
+  // The quoted price builds off the MEAN token cost (m2UnitPrice, computed
+  // at top level — standard cost-plus practice), but the true cost basis
+  // below uses the P90 tail cost instead, same tail-risk lesson as M3.
   const m2Tier2Price = volume * m2UnitPrice;
-
-  // M2 Tier 2's own cost basis (unit cost + allocated overhead) × volume —
-  // this is on a per-call scale, wildly different from the Tier 1 monthly
-  // cost-recovery breakdown, so it needs its own line rather than sharing
-  // vendorCost (which previously produced a nonsensical negative margin here).
-  const m2Tier2Cost = (m2UnitCost + m2AllocOverhead) * volume;
+  const m2Tier2Cost  = (m2ComputeCostP90 + m2AllocOverhead) * volume;
 
   const m2 = isM2Tier1 ? m2Tier1Price : m2Tier2Price;
   const m2Cost = isM2Tier1 ? vendorCost : m2Tier2Cost;
@@ -346,12 +361,74 @@ fully-loaded operating margin.
 
 **M2 Tier 2 and M3 are the two exceptions**, each for the same underlying reason: their
 price scales with volume, but the Tier 1 monthly breakdown doesn't, so comparing them
-produces a nonsensical or exaggerated margin. M2 Tier 2 is priced and billed per unit (unit
-cost + allocated overhead, in pence per call) — a completely different scale from the Tier 1
-monthly figure — so it uses `(unit cost + allocated overhead) × volume` instead. M3 is priced
-off a **human-equivalent hourly rate** (its task price is `hours × rate`), but the vendor's
-actual cost to run it is AI compute — i.e. **tokens** — so it uses its own token-based cost
-line instead (see below).
+produces a nonsensical or exaggerated margin. Both are also priced and costed off **AI
+compute — i.e. tokens** — rather than the Tier 1 infra breakdown, so both use their own
+token-based cost line instead, costed at the **P90** tail rather than the mean (see the two
+callouts below).
+:::
+
+::: {.callout-tip collapse="true" title="M2 Tier 2's compute cost: tokens, not a flat guess — and costed at the tail, not the mean"}
+Same problem, same fix as M3 below: "unit cost (infra + license per call)" was previously a
+flat guess. It's really a token cost (tokens per call × £ per 1,000 tokens), and that cost is
+a **long-tailed distribution**, not a single number. The **quoted price** still builds off
+the *mean* token cost — you can't reasonably quote a customer a percentile, and that mirrors
+standard cost-plus practice — but the **true cost** used for the margin/profit chart below
+uses the **P90**, so the displayed margin reflects real tail exposure, not an optimistic
+average.
+
+```{ojs}
+//| label: m2t2-sensitivity
+//| echo: false
+Inputs.table(
+  [{
+    "": "Cost basis",
+    "£/call": gbpUnit(m2ComputeCostMean),
+    "Margin at this cost": `${((1 - (m2ComputeCostMean + m2AllocOverhead) / m2UnitPrice) * 100).toFixed(0)}%`,
+  }, {
+    "": "P90 (used above)",
+    "£/call": gbpUnit(m2ComputeCostP90),
+    "Margin at this cost": `${((1 - (m2ComputeCostP90 + m2AllocOverhead) / m2UnitPrice) * 100).toFixed(0)}%`,
+  }],
+  {layout: "auto"}
+)
+```
+
+```{ojs}
+//| label: m2t2-mean-vs-p90-note
+//| echo: false
+html`<p>At the current token settings, costing off the mean instead of the P90 would
+understate M2 Tier 2's true cost by <b>${((1 - m2ComputeCostMean / m2ComputeCostP90) * 100).toFixed(0)}%</b>.
+Because the quoted price is built off the mean, this doesn't show up as a mispriced quote the
+way it would for a pure cost estimate — it shows up as a <b>margin that runs thinner than the
+${(m2T2Margin * 100).toFixed(0)}% target</b> once real tail costs are accounted for.</p>`
+```
+
+The table below shows how sensitive that gap is to the token **Coefficient of Variation**,
+holding median tokens and token rate at their current slider values.
+
+```{ojs}
+//| label: m2t2-cov-sensitivity
+//| echo: false
+m2SensCoVs = [0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.5]
+
+m2MarginAtCoV = (cov) => {
+  const sigma = Math.sqrt(Math.log(1 + cov ** 2));
+  const costP90 = Math.exp(m2TokenMuC + Z90 * sigma);
+  return m2UnitPrice > 0 ? (m2UnitPrice - (costP90 + m2AllocOverhead)) / m2UnitPrice : 0;
+}
+
+Inputs.table(
+  [Object.fromEntries([
+    ["", "Margin at P90 cost"],
+    ...m2SensCoVs.map(cov => [`CoV ${cov}`, `${(m2MarginAtCoV(cov) * 100).toFixed(0)}%`])
+  ])],
+  {layout: "auto"}
+)
+```
+
+Same lesson as M3: at low CoV, quoting off the mean is close enough to the true P90 cost that
+the target margin roughly holds. As CoV climbs toward realistic levels, the gap between mean
+and P90 widens and the real margin falls further below what was quoted for.
 :::
 
 ::: {.callout-tip collapse="true" title="M3's compute cost: tokens, not a flat guess — and costed at the tail, not the mean"}
