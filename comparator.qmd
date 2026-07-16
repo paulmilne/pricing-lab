@@ -67,6 +67,11 @@ viewof dealTier  = Inputs.radio(
 | **Tier 3 · Digital Labor** | M1 Per Seat (digital employee) · M3 Task (per deliverable) · M5 Outcome (value share, mature customers only) |
 
 M4 is Tier 2-only and M5 is Tier 3-only; M1, M2 and M3 each bridge two tiers but never all three.
+
+**Note:** the bar chart below deliberately omits M1 from the Tier 3 view even though the doc
+lists it there. M2/M3 could be reconciled onto the same footing with a calls-per-task ratio;
+M1's per-seat price has no such link to task volume or business value, so showing it next to
+M3/M5 would suggest a false apples-to-apples comparison rather than a genuine one.
 :::
 
 ::: {.callout-note collapse="true" title="Fine-tune each model (optional)"}
@@ -198,10 +203,17 @@ humanMonthly = fteCount * fteCost / 12;
 
 // Tier-to-Model Mapping (CoE reference doc §5.4) — which of the five models
 // are actually offered under each deployment tier.
+// Per §5.4, Tier 3 officially includes M1 (per-seat "digital employee") too.
+// It's deliberately left out of the comparator's bar chart: unlike M2/M3
+// (linked via calls-per-task), M1's price has no connection to volume or
+// business value at all — it answers a different question (headcount, not
+// task/outcome volume), so plotting it next to M3/M5 would imply a false
+// apples-to-apples comparison. M1 stays available as a valid Tier 3 option
+// elsewhere (e.g. the Model Selector); it's just not plotted here.
 TIER_MODELS = ({
   "Tier 1 · Internal Use":        ["M1 Per Seat", "M2 Usage"],
   "Tier 2 · Platform Services":   ["M2 Usage", "M3 Task", "M4 Hybrid"],
-  "Tier 3 · Digital Labor":       ["M1 Per Seat", "M3 Task", "M5 Outcome"],
+  "Tier 3 · Digital Labor":       ["M3 Task", "M5 Outcome"],
 })
 activeModels = TIER_MODELS[dealTier];
 
