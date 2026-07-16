@@ -120,15 +120,24 @@ viewof m2AllocOverhead = Inputs.range([0.01, 1], {value: 0.05, step: 0.01, label
 // the M2 Tier 2 sensitivity callout below for why mean-based pricing here
 // runs this close to the edge in the first place.
 viewof m2T2Margin   = Inputs.range([0.30, 0.50], {value: 0.50, step: 0.01, label: "M2 T2 · target margin (30–50%)"})
-viewof m3Hours      = Inputs.range([0.1, 8],     {value: 1,    step: 0.1,  label: "M3 · estimated hours per task"})
-viewof m3Rate       = Inputs.range([15, 100],    {value: 40,   step: 5,    label: "M3 · hourly rate (£/hr)"})
-viewof m3Complexity = Inputs.range([1.0, 2.0],   {value: 1.2,  step: 0.1,  label: "M3 · complexity multiplier"})
+// Defaults calibrated against the default engagement (3 FTEs × £60k/yr ≈
+// £15,000/mo, ≈480 working hours/mo): at 1,000 tasks/mo × 0.5hr, M3 implies
+// ~500 hours — close to that capacity — instead of the previous 1,000
+// hours (2x over), so the M3-vs-human comparison starts out believable
+// rather than comparing very different amounts of work. See the sanity
+// check below the chart.
+viewof m3Hours      = Inputs.range([0.1, 8],     {value: 0.5,  step: 0.1,  label: "M3 · estimated hours per task"})
+viewof m3Rate       = Inputs.range([15, 100],    {value: 30,   step: 5,    label: "M3 · hourly rate (£/hr)"})
+viewof m3Complexity = Inputs.range([1.0, 2.0],   {value: 1.1,  step: 0.1,  label: "M3 · complexity multiplier"})
 // M3's own cost basis: unlike its price (hours × human-equivalent rate), the
 // vendor's actual cost to run each task is AI compute — i.e. tokens, not
 // labour. Modelled the same way as token-distribution.qmd: a log-normal
 // distribution of tokens per task (median + CoV), costed at the P90 tail,
 // not the mean — see the explanation below.
-viewof m3MedianTokens = Inputs.range([5000, 150000], {value: 40000, step: 1000, label: "M3 · median tokens per task"})
+// Default lowered alongside the hours/rate/complexity recalibration above —
+// otherwise the (unrelated) token-cost default stayed put while price came
+// down, briefly making M3's default margin go negative the other way.
+viewof m3MedianTokens = Inputs.range([5000, 150000], {value: 8000, step: 1000, label: "M3 · median tokens per task"})
 viewof m3TokenRate    = Inputs.range([0.05, 2.00],   {value: 0.50,  step: 0.05, label: "M3 · token rate (£ per 1,000 tokens)"})
 viewof m3TokenCoV     = Inputs.range([0.2, 1.5],     {value: 0.7,   step: 0.05, label: "M3 · token cost variability (CoV)"})
 viewof m4BaseFee    = Inputs.range([0, 30000],   {value: 8000, step: 500,  label: "M4 · base platform fee (£/mo)"})
@@ -150,7 +159,7 @@ against renegotiation risk at scale rather than capturing value:
 //| label: risk-inputs
 viewof m2RiskRate   = Inputs.range([0.05, 0.10], {value: 0.07, step: 0.01, label: "M2 T1 · risk reserve (% of cost, 5–10%)"})
 viewof m2T2RiskPrem = Inputs.range([0.00, 0.20], {value: 0.01, step: 0.01, label: "M2 T2 · risk premium (£/call)"})
-viewof m3RiskPrem   = Inputs.range([1, 50],      {value: 10,   step: 1,    label: "M3 · risk premium per task (£)"})
+viewof m3RiskPrem   = Inputs.range([1, 50],      {value: 5,    step: 1,    label: "M3 · risk premium per task (£)"})
 viewof ceilMult     = Inputs.range([3, 5],       {value: 4,    step: 0.5,  label: "M5 · ceiling (× floor)"})
 ```
 
@@ -306,6 +315,30 @@ much of that the vendor actually gets to keep.
 html`<div style="font-size:.9em;color:#555;margin:-.3em 0 .6em;">
   Showing <b>${activeModels.length}</b> model${activeModels.length === 1 ? "" : "s"} valid for
   <b>${dealTier}</b>: ${activeModels.join(", ")}.</div>`
+```
+
+```{ojs}
+//| label: m3-sanity-check
+//| echo: false
+// M3's task economics (volume × hours) can drift out of sync with the human
+// baseline (FTE count) they're meant to be compared against — that's what
+// produced a £58,000/mo M3 quote against a £15,000/mo human baseline before
+// these defaults were recalibrated. Flag it live whenever it happens again.
+m3ImpliedHours   = volume * m3Hours
+fteCapacityHours = fteCount * 160  // ~160 working hours/month per FTE
+m3HoursRatio     = fteCapacityHours > 0 ? m3ImpliedHours / fteCapacityHours : 0
+m3PriceRatio     = humanMonthly > 0 ? (volume * m3TaskPrice) / humanMonthly : 0
+
+activeModels.includes("M3 Task") && (m3HoursRatio > 1.2 || m3PriceRatio > 2)
+  ? html`<div style="font-size:.9em;background:#FFF3E0;border-left:3px solid #EF5E82;
+           padding:.5em .8em;margin:0 0 .8em;">
+      ⚠️ <b>M3 sanity check:</b> at ${volume.toLocaleString()} tasks/mo × ${m3Hours}hr,
+      M3 implies <b>${m3ImpliedHours.toLocaleString()} hours/mo</b> of work — about
+      <b>${m3HoursRatio.toFixed(1)}×</b> the ${fteCount}-FTE baseline's ~${fteCapacityHours.toLocaleString()}hr
+      capacity — and its price is <b>${m3PriceRatio.toFixed(1)}×</b> the human cost today.
+      Check that "tasks delivered per month" and "estimated hours per task" describe the
+      same scope of work as the FTEs you're comparing against.</div>`
+  : ""
 ```
 
 ```{ojs}
