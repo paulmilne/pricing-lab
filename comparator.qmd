@@ -270,6 +270,12 @@ html`<div style="font-size:.9em;color:#555;margin:-.3em 0 .6em;">
 ```{ojs}
 //| label: chart
 //| echo: false
+// Headroom above the tallest bar so the price/margin labels above it don't
+// get clipped, and a height threshold below which an in-segment £ label
+// would be too cramped to read (so we skip it rather than overlap text).
+chartYMax = Math.max(...prices.map(d => d.price)) * 1.22
+minLabelHeight = chartYMax * 0.055
+
 Plot.plot({
   marginLeft: 70,
   marginTop: 30,
@@ -277,15 +283,22 @@ Plot.plot({
   height: 380,
   x: {label: null, domain: prices.map(d => d.model)},
   y: {label: "↑ Monthly price to customer (£)", grid: true,
-      // Headroom above the tallest bar so the price/margin labels above it
-      // don't get clipped by the plot frame.
-      domain: [0, Math.max(...prices.map(d => d.price)) * 1.22],
+      domain: [0, chartYMax],
       tickFormat: (s) => "£" + (s / 1000) + "k"},
   color: {domain: ["Vendor cost", "Profit"], range: costProfitPalette, legend: true},
   marks: [
     Plot.barY(segments, {x: "model", y1: "y1", y2: "y2", fill: "segment",
       tip: {format: {y1: false, y2: false, fill: false},
             channels: {"£/mo": (d) => gbp(d.y2 - d.y1)}}}),
+    // In-segment £ breakdown — dark text on the grey cost segment, white
+    // text on the teal profit segment, each only shown if its slice is
+    // tall enough to hold the label legibly.
+    Plot.text(segments.filter(d => d.segment === "Vendor cost" && (d.y2 - d.y1) > minLabelHeight),
+      {x: "model", y: (d) => (d.y1 + d.y2) / 2, text: (d) => gbp(d.y2 - d.y1),
+       fill: "#222", fontSize: 11, fontWeight: 600}),
+    Plot.text(segments.filter(d => d.segment === "Profit" && (d.y2 - d.y1) > minLabelHeight),
+      {x: "model", y: (d) => (d.y1 + d.y2) / 2, text: (d) => gbp(d.y2 - d.y1),
+       fill: "white", fontSize: 11, fontWeight: 600}),
     Plot.text(prices, {x: "model", y: "price", text: (d) => gbp(d.price),
       dy: -8, fontWeight: "bold"}),
     Plot.text(prices, {x: "model", y: "price",
