@@ -27,12 +27,13 @@ site, change the formulas, and host your own version on GitHub Pages for free.
 
 ## The modules
 
-| Module | What you'll learn | Status |
-|---|---|---|
-| [**Model Selector**](decision-tree.qmd) | Answer a few questions, get a recommended tier, model, and approval path. | ✅ Ready |
-| [**Five-Model Comparator**](comparator.qmd) | Price one engagement under all five models at once — see the spread. | ✅ Ready |
-| [**Token Distribution & the P90 Floor**](token-distribution.qmd) | Why pricing at the *mean* loses money, with a Monte-Carlo margin simulation. | ✅ Ready |
-| [**M5 Outcome Designer**](outcome-designer.qmd) | Flat vs. tiered (Lehman) value-share, and the renegotiation cliff. | ✅ Ready |
+| Module | What you'll learn |
+|---|---|
+| [**Model Selector**](decision-tree.qmd) | Answer a few questions, get a recommended tier, model, and approval path. |
+| [**Five-Model Comparator**](comparator.qmd) | Price one engagement under all five models at once — see the spread. |
+| [**Token Distribution & the P90 Floor**](token-distribution.qmd) | Why pricing at the *mean* loses money, with a Monte-Carlo margin simulation. |
+| [**M5 Outcome Designer**](outcome-designer.qmd) | Flat vs. tiered (Lehman) value-share, and the renegotiation cliff. |
+| [**Causal Map**](causal-diagram.qmd) | How the inputs actually drive cost, price and margin — and where they don't yet. |
 
 ## A reminder on the five models
 

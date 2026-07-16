@@ -144,7 +144,7 @@
     "href": "index.html#the-modules",
     "title": "Agentic AI Pricing Lab",
     "section": "The modules",
-    "text": "The modules\n\n\n\nModule\nWhat you’ll learn\nStatus\n\n\n\n\nModel Selector\nAnswer a few questions, get a recommended tier, model, and approval path.\n✅ Ready\n\n\nFive-Model Comparator\nPrice one engagement under all five models at once — see the spread.\n✅ Ready\n\n\nToken Distribution & the P90 Floor\nWhy pricing at the mean loses money, with a Monte-Carlo margin simulation.\n✅ Ready\n\n\nM5 Outcome Designer\nFlat vs. tiered (Lehman) value-share, and the renegotiation cliff.\n✅ Ready"
+    "text": "The modules\n\n\n\nModule\nWhat you’ll learn\n\n\n\n\nModel Selector\nAnswer a few questions, get a recommended tier, model, and approval path.\n\n\nFive-Model Comparator\nPrice one engagement under all five models at once — see the spread.\n\n\nToken Distribution & the P90 Floor\nWhy pricing at the mean loses money, with a Monte-Carlo margin simulation.\n\n\nM5 Outcome Designer\nFlat vs. tiered (Lehman) value-share, and the renegotiation cliff.\n\n\nCausal Map\nHow the inputs actually drive cost, price and margin — and where they don’t yet."
   },
   {
     "objectID": "index.html#a-reminder-on-the-five-models",
