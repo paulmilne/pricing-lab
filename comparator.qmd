@@ -484,6 +484,42 @@ the target margin roughly holds. As CoV climbs toward realistic levels, the gap 
 and P90 widens and the real margin falls further below what was quoted for.
 :::
 
+::: {.callout-tip collapse="true" title="How sensitive is the M2 vs M3 disparity to the calls-per-task guess?"}
+"API calls per task" (default 20) is a guess, not a measured figure — a real agent's calls-
+per-task will vary by workflow. The table below holds every other slider at its current
+value and shows M2 Tier 2's total price, and its ratio to M3's price, across a range of
+plausible calls-per-task assumptions. (M2's *margin* doesn't appear here because it's
+invariant to this ratio — both M2's price and cost scale by the same factor, so it cancels
+out, same as the volume-invariance noted in the M3 sensitivity callout below.)
+
+```{ojs}
+//| label: m2-vs-m3-ratio-sensitivity
+//| echo: false
+m2SensCallsPerTask = [1, 5, 10, 15, 20, 30, 50, 75, 100]
+
+m2PriceAtRatio = (cpt) => volume * cpt * m2UnitPrice
+m3PriceForRatio = volume * m3TaskPrice
+
+Inputs.table(
+  m2SensCallsPerTask.map(cpt => ({
+    "Calls/task": cpt,
+    "M2 price": gbp(m2PriceAtRatio(cpt)),
+    "M3 price": gbp(m3PriceForRatio),
+    "M2 ÷ M3": `${(m2PriceAtRatio(cpt) / m3PriceForRatio).toFixed(2)}×`,
+  })),
+  {layout: "auto"}
+)
+```
+
+At the current default of 20 calls/task, M2 and M3 land within roughly the same order of
+magnitude. Below about 10 calls/task, M2 undercuts M3 substantially; above ~30, M2 pulls
+ahead of M3 again, echoing the same compounding effect that needed recalibrating a moment
+ago — just from the ratio moving instead of the per-call cost. There's no "right" answer
+here without a real workflow to measure; the point is that this guess has real leverage over
+which model looks cheaper, so it's worth stress-testing against your actual agent's
+call-per-task pattern before trusting the comparison.
+:::
+
 ::: {.callout-tip collapse="true" title="M3's compute cost: tokens, not a flat guess — and costed at the tail, not the mean"}
 An earlier version of this page modelled M3's compute cost as a flat "£ per task" guess.
 That was wrong on two counts: AI compute cost is fundamentally a **token cost** (tokens per
