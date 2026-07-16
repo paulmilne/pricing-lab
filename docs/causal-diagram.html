@@ -300,7 +300,7 @@ flowchart LR
   muC2 --&gt; p902["P90 cost/call"]
   sigma2 --&gt; p902
 
-  mean2 --&gt;|"+ allocated overhead, ÷(1-margin), + risk premium"| unitPrice["Unit price (quoted)"]
+  mean2 --&gt;|"plus overhead, ÷(1-margin), plus risk premium"| unitPrice["Unit price (quoted)"]
   overhead2["Allocated overhead"] --&gt; unitPrice
   margin2["Target margin (30–50%)"] --&gt; unitPrice
   riskPrem2["Risk premium/call"] --&gt; unitPrice
@@ -308,7 +308,7 @@ flowchart LR
   unitPrice --&gt; price2["M2 T2 price\n= calls × unit price"]
   calls --&gt; price2
 
-  p902 --&gt;|"+ allocated overhead"| costBasis2["Cost basis (P90-based)"]
+  p902 --&gt;|"plus allocated overhead"| costBasis2["Cost basis (P90-based)"]
   overhead2 --&gt; costBasis2
   costBasis2 --&gt; cost2["M2 T2 cost\n= calls × cost basis"]
   calls --&gt; cost2
@@ -335,7 +335,7 @@ flowchart LR
   rate3["Hourly rate"] --&gt; base3
   base3 --&gt;|"× complexity"| complexAdj3["Complexity-adjusted"]
   complexity3["Complexity multiplier"] --&gt; complexAdj3
-  complexAdj3 --&gt;|"+ risk premium"| taskPrice["M3 task price"]
+  complexAdj3 --&gt;|"plus risk premium"| taskPrice["M3 task price"]
   riskPrem3["Risk premium/task"] --&gt; taskPrice
 
   vol3["Volume (tasks/mo)"] --&gt; price3["M3 price = volume × task price"]
