@@ -46,26 +46,40 @@ and margin) — so each stays readable on its own.
 ```{mermaid}
 %%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "clusterBkg": "#f5f7fa", "clusterBorder": "#9fb3c8", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 35, "rankSpacing": 55}}}%%
 flowchart TB
+  %% Blank spacer nodes below each cluster title, invisibly linked to the
+  %% first real node — Mermaid otherwise renders that node's box right under
+  %% the cluster title text, overlapping it, especially when the node also
+  %% has an incoming edge from outside the cluster pulling it upward.
   subgraph EXT["External / qualitative drivers"]
+    extSpacer[" "]
     complexity["Task / workflow<br/>complexity"]
     autonomyQ["Autonomy level<br/>(L1–L5)"]
     riskQ["Risk score<br/>(1–10)"]
     tier["Deployment tier<br/>(1 / 2 / 3)"]
+    extSpacer ~~~ complexity
   end
 
   subgraph SHARED["Shared engagement inputs"]
+    sharedSpacer[" "]
     fte["FTE count × FTE cost"]
     vol["Volume<br/>(tasks delivered/mo)"]
     val["Business value<br/>created (£/mo)"]
+    sharedSpacer ~~~ fte
   end
 
   subgraph TOKENS["Token-cost model<br/>(M2 T2 & M3, set independently)"]
+    tokensSpacer[" "]
     cov["Token CoV"]
     meanC["Mean token cost"]
     p90C["P90 token cost"]
+    tokensSpacer ~~~ cov
     cov --> meanC
     cov --> p90C
   end
+
+  style extSpacer fill:transparent,stroke:none
+  style sharedSpacer fill:transparent,stroke:none
+  style tokensSpacer fill:transparent,stroke:none
 
   tier -->|filters models| models["Active models<br/>(§5.4 mapping)"]
   tier -->|picks formula| m2choice["M2: Tier 1 vs Tier 2"]
