@@ -111,6 +111,12 @@ viewof m2Margin     = Inputs.range([0, 0.20],    {value: 0.15, step: 0.01, label
 // (standard cost-plus practice — you can't quote off a percentile), but the
 // vendor's true cost used for the margin/profit chart is the P90, same
 // tail-risk lesson as M3 and token-distribution.qmd.
+// The shared "Tasks delivered per month" slider means something different
+// for M2 Tier 2 (a single API call) than for M3 (one completed, multi-step
+// task) — a task is typically many calls. This ratio links them so both
+// models describe the same underlying workload, instead of comparing 1,000
+// calls against 1,000 tasks as if they were the same amount of work.
+viewof m2CallsPerTask  = Inputs.range([1, 100],      {value: 20,   step: 1,    label: "M2 T2 · API calls per task (links volume to M3)"})
 viewof m2MedianTokens  = Inputs.range([100, 20000],  {value: 3000, step: 100,  label: "M2 T2 · median tokens per call"})
 viewof m2TokenRate     = Inputs.range([0.05, 2.00],  {value: 0.50, step: 0.05, label: "M2 T2 · token rate (£ per 1,000 tokens)"})
 viewof m2TokenCoV      = Inputs.range([0.2, 1.5],    {value: 0.7,  step: 0.05, label: "M2 T2 · token cost variability (CoV)"})
@@ -237,13 +243,17 @@ prices = {
   const m2Tier1Price = overlay(vendorCost / (1 - m2Margin));
 
   // M2 · Tier 2: platform usage, priced and billed per unit, scaling with
-  // volume. Skips the generic overlay — like M3, its own per-unit risk
-  // premium already prices that in, so applying both would double-count it.
-  // The quoted price builds off the MEAN token cost (m2UnitPrice, computed
-  // at top level — standard cost-plus practice), but the true cost basis
-  // below uses the P90 tail cost instead, same tail-risk lesson as M3.
-  const m2Tier2Price = volume * m2UnitPrice;
-  const m2Tier2Cost  = (m2ComputeCostP90 + m2AllocOverhead) * volume;
+  // *calls*, not tasks — volume × callsPerTask converts the shared "tasks
+  // delivered" input into the same workload M3 is pricing, instead of
+  // treating 1,000 calls and 1,000 tasks as equivalent amounts of work.
+  // Skips the generic overlay — like M3, its own per-unit risk premium
+  // already prices that in, so applying both would double-count it. The
+  // quoted price builds off the MEAN token cost (m2UnitPrice, computed at
+  // top level — standard cost-plus practice), but the true cost basis below
+  // uses the P90 tail cost instead, same tail-risk lesson as M3.
+  const m2EffectiveCalls = volume * m2CallsPerTask;
+  const m2Tier2Price = m2EffectiveCalls * m2UnitPrice;
+  const m2Tier2Cost  = (m2ComputeCostP90 + m2AllocOverhead) * m2EffectiveCalls;
 
   const m2 = isM2Tier1 ? m2Tier1Price : m2Tier2Price;
   const m2Cost = isM2Tier1 ? vendorCost : m2Tier2Cost;
@@ -277,7 +287,7 @@ prices = {
     withProfit("M2 Usage",    m2,
       isM2Tier1
         ? `cost recovery @ ${(m2Margin*100).toFixed(0)}% margin`
-        : `${volume.toLocaleString()} calls × ${gbpUnit(m2UnitPrice)}/call`,
+        : `${m2EffectiveCalls.toLocaleString()} calls × ${gbpUnit(m2UnitPrice)}/call`,
       m2Cost),
     withProfit("M3 Task",     m3, `${volume.toLocaleString()} tasks × ${gbp(m3TaskPrice)}/task`, m3Cost),
     withProfit("M4 Hybrid",   m4, `base + ${(m4Share*100).toFixed(1)}% of value`),
@@ -583,7 +593,7 @@ modifier is ×1.00 up to L3, **×1.20 at L4**, and **×1.40 at L5**.
 |---|---|
 | **M1 Per Seat** | $\text{FTEs} \times \dfrac{\text{FTE cost}}{12} \times \text{seat discount}$ |
 | **M2 Usage (Tier 1)** | $\dfrac{\text{Infra} + \text{License} + \text{Support} + \text{Risk Reserve} + \text{CoE Overhead}}{1 - \text{margin}}$ |
-| **M2 Usage (Tier 2)** | $\text{volume} \times \Big[\dfrac{\text{unit cost} + \text{allocated overhead}}{1 - \text{margin}} + \text{risk premium}\Big]$ |
+| **M2 Usage (Tier 2)** | $(\text{volume} \times \text{calls/task}) \times \Big[\dfrac{\text{unit cost} + \text{allocated overhead}}{1 - \text{margin}} + \text{risk premium}\Big]$ |
 | **M3 Task** | $\text{volume} \times \Big[(\text{hours} \times \text{hourly rate}) \times \text{complexity} + \text{risk premium}\Big]$ |
 | **M4 Hybrid** | $\text{base fee} + \text{value} \times \text{share \%}$ |
 | **M5 Outcome** | $\max\big(\text{floor},\ \min(\text{ceiling},\ \text{value} \times \text{share \%})\big)$ |
