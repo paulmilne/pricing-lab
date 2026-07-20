@@ -128,8 +128,8 @@ flowchart TB
 ```{mermaid}
 %%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 30, "rankSpacing": 50}}}%%
 flowchart LR
-  vol2["Volume (tasks/mo)"] --> calls["Effective calls\n= volume × calls-per-task"]
-  cpt["Calls per task\n(guess — see sensitivity table)"] --> calls
+  vol2["Volume (tasks/mo)"] --> calls["Effective calls<br/>= volume × calls-per-task"]
+  cpt["Calls per task<br/>(guess — see sensitivity table)"] --> calls
 
   tok2["Median tokens/call"] --> muC2["log(median cost)"]
   rate2["Token rate (£/1k tokens)"] --> muC2
@@ -145,12 +145,12 @@ flowchart LR
   margin2["Target margin (30–50%)"] --> unitPrice
   riskPrem2["Risk premium/call"] --> unitPrice
 
-  unitPrice --> price2["M2 T2 price\n= calls × unit price"]
+  unitPrice --> price2["M2 T2 price<br/>= calls × unit price"]
   calls --> price2
 
   p902 -->|"plus allocated overhead"| costBasis2["Cost basis (P90-based)"]
   overhead2 --> costBasis2
-  costBasis2 --> cost2["M2 T2 cost\n= calls × cost basis"]
+  costBasis2 --> cost2["M2 T2 cost<br/>= calls × cost basis"]
   calls --> cost2
 
   price2 --> margin2out["Displayed margin"]
@@ -185,11 +185,11 @@ flowchart LR
   cost3 --> margin3out
 
   fte3["FTE count × ~160hr"] --> capacity3["Capacity (hours/mo)"]
-  vol3 --> impliedHrs3["Implied hours\n= volume × hours/task"]
+  vol3 --> impliedHrs3["Implied hours<br/>= volume × hours/task"]
   hrs3 --> impliedHrs3
   capacity3 --> ratio3["Hours ratio"]
   impliedHrs3 --> ratio3
-  ratio3 --> warn3["Sanity-check warning\n(if ratio > 1.2 or price > 2× human cost)"]
+  ratio3 --> warn3["Sanity-check warning<br/>(if ratio > 1.2 or price > 2× human cost)"]
   price3 --> warn3
 ```
 
@@ -201,16 +201,19 @@ spreadsheet. But the business those numbers describe is not acyclic: price feeds
 margin funds capability, capability raises the value delivered, and that in turn changes
 what a customer will pay. Those are **feedback loops**, and they're invisible in a DAG.
 
-This last diagram is a proper **causal loop diagram (CLD)**. It doesn't correspond to any
-code in `comparator.qmd` — nothing here moves when you drag a slider. It's a model of the
-operating environment the lab sits inside, drawn to show where the reinforcing and
-balancing pressures actually are.
+The two diagrams below are a proper **causal loop diagram (CLD)**, split for legibility
+into the **reinforcing engines** that make the business compound and the **balancing loops**
+that hold them in check. Neither corresponds to any code in `comparator.qmd` — nothing here
+moves when you drag a slider. They're a model of the operating environment the lab sits
+inside, drawn to show where the reinforcing and balancing pressures actually are. A handful
+of variables (value, volume, margin, price) appear in both diagrams — that's the point:
+they're the junctions where the growth loops and the constraint loops meet.
 
 ::: {.callout-note}
 ## Reading a causal loop diagram
-Each arrow carries a **polarity**. A **`+`** means the two variables move *the same way*
-(more of the cause → more of the effect, all else equal); a **`−`** means they move
-*opposite* ways. Trace a loop and count the `−` signs: an **even** number (including zero)
+Each arrow carries a **polarity**. A **`(+)`** means the two variables move *the same way*
+(more of the cause → more of the effect, all else equal); a **`(−)`** means they move
+*opposite* ways. Trace a loop and count the `(−)` signs: an **even** number (including zero)
 makes it a **reinforcing (R)** loop — a virtuous or vicious cycle that compounds; an
 **odd** number makes it a **balancing (B)** loop — one that pushes back toward equilibrium.
 Node colour groups variables by domain: <span style="color:#4a6fa5">**customer**</span>,
@@ -220,82 +223,96 @@ Node colour groups variables by domain: <span style="color:#4a6fa5">**customer**
 <span style="color:#7a5aa5">**market**</span>.
 :::
 
+### Reinforcing engines — how growth compounds (R1, R2)
+
 ```{mermaid}
-%%{init: {"theme": "base", "themeVariables": {"fontSize": "15px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 40, "rankSpacing": 60}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 45, "rankSpacing": 65}}}%%
 flowchart LR
-  %% ---- Customer & value ----
   value["Value delivered<br/>to customer"]
   wtp["Customer<br/>willingness-to-pay"]
-  trust["Customer trust"]
-  perceived["Customer-perceived<br/>cost"]
-  churn["Renegotiation &<br/>churn risk"]
-
-  %% ---- Commercial ----
   price["Price achievable"]
   margin["Margin"]
-  vshare["Aggressive M5<br/>value-share"]
-
-  %% ---- Delivery / adoption ----
-  autonomy["Autonomy granted<br/>(L1&rarr;L5)"]
+  reinvest["Reinvestment<br/>in capability"]
+  trust["Customer trust"]
+  autonomy["Autonomy granted<br/>(L1→L5)"]
   volume["Task volume<br/>delivered"]
   proof["Proof points /<br/>references"]
   engage["New engagements"]
-  reinvest["Reinvestment<br/>in capability"]
-  oversight["Human-oversight<br/>hours needed"]
-  capacity["Spare oversight<br/>capacity"]
 
-  %% ---- Cost ----
+  %% R1 Value flywheel
+  value -->|"(+)"| wtp
+  wtp -->|"(+)"| price
+  price -->|"(+)"| margin
+  margin -->|"(+)"| reinvest
+  reinvest -->|"(+)"| value
+
+  %% R2 Land & expand
+  value -->|"(+)"| trust
+  trust -->|"(+)"| autonomy
+  autonomy -->|"(+)"| volume
+  volume -->|"(+)"| proof
+  proof -->|"(+)"| trust
+  proof -->|"(+)"| engage
+  engage -->|"(+)"| volume
+  volume -->|"(+)"| value
+
+  classDef customer fill:#eaf1fb,stroke:#4a6fa5,color:#1a1a1a;
+  classDef commercial fill:#e6f4ea,stroke:#3f7d54,color:#1a1a1a;
+  classDef delivery fill:#fdf1e0,stroke:#c08a3e,color:#1a1a1a;
+
+  class value,wtp,trust customer;
+  class price,margin commercial;
+  class autonomy,volume,proof,engage,reinvest delivery;
+```
+
+### Balancing loops — what holds it in check (B1–B5)
+
+```{mermaid}
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 45, "rankSpacing": 65}}}%%
+flowchart LR
+  value["Value delivered<br/>to customer"]
+  volume["Task volume<br/>delivered"]
+  margin["Margin"]
+  price["Price achievable"]
   complexity["Task complexity"]
   tokens["Token consumption"]
   compute["P90 compute cost"]
   optim["Model / prompt<br/>optimisation"]
-
-  %% ---- Market ----
+  vshare["Aggressive M5<br/>value-share"]
+  perceived["Customer-perceived<br/>cost"]
+  churn["Renegotiation /<br/>churn risk"]
   maturity["Market maturity"]
   comp["Competitor<br/>pricing pressure"]
-
-  %% R1 Value flywheel
-  value -->|"+"| wtp
-  wtp -->|"+"| price
-  price -->|"+"| margin
-  margin -->|"+"| reinvest
-  reinvest -->|"+"| value
-
-  %% R2 Land & expand
-  value -->|"+"| trust
-  trust -->|"+"| autonomy
-  autonomy -->|"+"| volume
-  volume -->|"+"| proof
-  proof -->|"+"| trust
-  proof -->|"+"| engage
-  engage -->|"+"| volume
-  volume -->|"+"| value
+  oversight["Human-oversight<br/>hours needed"]
+  capacity["Spare oversight<br/>capacity"]
 
   %% B1 Token-cost squeeze
-  volume -->|"+"| tokens
-  complexity -->|"+"| tokens
-  tokens -->|"+"| compute
-  compute -->|"&minus;"| margin
+  volume -->|"(+)"| tokens
+  complexity -->|"(+)"| tokens
+  tokens -->|"(+)"| compute
+  compute -->|"(−)"| margin
 
   %% B2 Efficiency response
-  margin -->|"&minus;"| optim
-  optim -->|"&minus;"| compute
+  margin -->|"(−)"| optim
+  optim -->|"(−)"| compute
 
   %% B3 Value-share / churn cliff
-  value -->|"+"| vshare
-  vshare -->|"+"| perceived
-  perceived -->|"+"| churn
-  churn -->|"&minus;"| volume
+  value -->|"(+)"| vshare
+  vshare -->|"(+)"| perceived
+  perceived -->|"(+)"| churn
+  churn -->|"(−)"| volume
+  volume -->|"(+)"| value
 
   %% B4 Commoditisation
-  margin -->|"+"| comp
-  maturity -->|"+"| comp
-  comp -->|"&minus;"| price
+  margin -->|"(+)"| comp
+  maturity -->|"(+)"| comp
+  comp -->|"(−)"| price
+  price -->|"(+)"| margin
 
   %% B5 Oversight capacity
-  volume -->|"+"| oversight
-  oversight -->|"&minus;"| capacity
-  capacity -->|"+"| volume
+  volume -->|"(+)"| oversight
+  oversight -->|"(−)"| capacity
+  capacity -->|"(+)"| volume
 
   classDef customer fill:#eaf1fb,stroke:#4a6fa5,color:#1a1a1a;
   classDef commercial fill:#e6f4ea,stroke:#3f7d54,color:#1a1a1a;
@@ -303,9 +320,9 @@ flowchart LR
   classDef cost fill:#fdeaea,stroke:#c0504d,color:#1a1a1a;
   classDef market fill:#efeaf7,stroke:#7a5aa5,color:#1a1a1a;
 
-  class value,wtp,trust,perceived,churn customer;
+  class value,perceived,churn customer;
   class price,margin,vshare commercial;
-  class autonomy,volume,proof,engage,reinvest,oversight,capacity delivery;
+  class volume,oversight,capacity delivery;
   class complexity,tokens,compute,optim cost;
   class maturity,comp market;
 ```
@@ -322,7 +339,7 @@ flowchart LR
 | **B4 · Commoditisation** | Balancing | margin → competitor pressure ← market maturity → price (−) | Fat margins and a maturing market attract competitors whose pricing erodes yours — the long-run ceiling on any single deal's economics. |
 | **B5 · Oversight capacity** | Balancing | volume → human-oversight hours → spare capacity (−) → volume | Agentic work still needs human oversight; as volume grows it consumes the very capacity needed to deliver it, unless autonomy (R2) raises the ceiling. |
 
-The interesting tension is between the two reinforcing engines (R1, R2) and the four
+The interesting tension is between the two reinforcing engines (R1, R2) and the five
 balancing loops that constrain them. R1 says *capture more value*; B3 and B4 say *not too
 much, or you'll lose the customer or the market*. R2 says *grow volume*; B1 and B5 say
 *volume has a cost and a capacity ceiling*. A durable pricing strategy is essentially a

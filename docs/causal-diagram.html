@@ -137,6 +137,8 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#zoom-m3-task" id="toc-zoom-m3-task" class="nav-link" data-scroll-target="#zoom-m3-task">Zoom: M3 Task</a></li>
   <li><a href="#the-wider-view-a-causal-loop-diagram" id="toc-the-wider-view-a-causal-loop-diagram" class="nav-link" data-scroll-target="#the-wider-view-a-causal-loop-diagram">The wider view: a causal loop diagram</a>
   <ul class="collapse">
+  <li><a href="#reinforcing-engines-how-growth-compounds-r1-r2" id="toc-reinforcing-engines-how-growth-compounds-r1-r2" class="nav-link" data-scroll-target="#reinforcing-engines-how-growth-compounds-r1-r2">Reinforcing engines — how growth compounds (R1, R2)</a></li>
+  <li><a href="#balancing-loops-what-holds-it-in-check-b1b5" id="toc-balancing-loops-what-holds-it-in-check-b1b5" class="nav-link" data-scroll-target="#balancing-loops-what-holds-it-in-check-b1b5">Balancing loops — what holds it in check (B1–B5)</a></li>
   <li><a href="#the-loops-one-at-a-time" id="toc-the-loops-one-at-a-time" class="nav-link" data-scroll-target="#the-loops-one-at-a-time">The loops, one at a time</a></li>
   </ul></li>
   <li><a href="#known-gaps-dashed-edges-above" id="toc-known-gaps-dashed-edges-above" class="nav-link" data-scroll-target="#known-gaps-dashed-edges-above">Known gaps (dashed edges above)</a></li>
@@ -306,8 +308,8 @@ flowchart TB
 <div>
 <pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 30, "rankSpacing": 50}}}%%
 flowchart LR
-  vol2["Volume (tasks/mo)"] --&gt; calls["Effective calls\n= volume × calls-per-task"]
-  cpt["Calls per task\n(guess — see sensitivity table)"] --&gt; calls
+  vol2["Volume (tasks/mo)"] --&gt; calls["Effective calls&lt;br/&gt;= volume × calls-per-task"]
+  cpt["Calls per task&lt;br/&gt;(guess — see sensitivity table)"] --&gt; calls
 
   tok2["Median tokens/call"] --&gt; muC2["log(median cost)"]
   rate2["Token rate (£/1k tokens)"] --&gt; muC2
@@ -323,12 +325,12 @@ flowchart LR
   margin2["Target margin (30–50%)"] --&gt; unitPrice
   riskPrem2["Risk premium/call"] --&gt; unitPrice
 
-  unitPrice --&gt; price2["M2 T2 price\n= calls × unit price"]
+  unitPrice --&gt; price2["M2 T2 price&lt;br/&gt;= calls × unit price"]
   calls --&gt; price2
 
   p902 --&gt;|"plus allocated overhead"| costBasis2["Cost basis (P90-based)"]
   overhead2 --&gt; costBasis2
-  costBasis2 --&gt; cost2["M2 T2 cost\n= calls × cost basis"]
+  costBasis2 --&gt; cost2["M2 T2 cost&lt;br/&gt;= calls × cost basis"]
   calls --&gt; cost2
 
   price2 --&gt; margin2out["Displayed margin"]
@@ -372,11 +374,11 @@ flowchart LR
   cost3 --&gt; margin3out
 
   fte3["FTE count × ~160hr"] --&gt; capacity3["Capacity (hours/mo)"]
-  vol3 --&gt; impliedHrs3["Implied hours\n= volume × hours/task"]
+  vol3 --&gt; impliedHrs3["Implied hours&lt;br/&gt;= volume × hours/task"]
   hrs3 --&gt; impliedHrs3
   capacity3 --&gt; ratio3["Hours ratio"]
   impliedHrs3 --&gt; ratio3
-  ratio3 --&gt; warn3["Sanity-check warning\n(if ratio &gt; 1.2 or price &gt; 2× human cost)"]
+  ratio3 --&gt; warn3["Sanity-check warning&lt;br/&gt;(if ratio &gt; 1.2 or price &gt; 2× human cost)"]
   price3 --&gt; warn3
 </pre>
 </div>
@@ -388,7 +390,7 @@ flowchart LR
 <section id="the-wider-view-a-causal-loop-diagram" class="level2">
 <h2 class="anchored" data-anchor-id="the-wider-view-a-causal-loop-diagram">The wider view: a causal loop diagram</h2>
 <p>The four diagrams above are <em>calling sequences</em> — acyclic maps of how one slider’s value propagates into a number on the bar chart. They deliberately stop at the edge of the spreadsheet. But the business those numbers describe is not acyclic: price feeds margin, margin funds capability, capability raises the value delivered, and that in turn changes what a customer will pay. Those are <strong>feedback loops</strong>, and they’re invisible in a DAG.</p>
-<p>This last diagram is a proper <strong>causal loop diagram (CLD)</strong>. It doesn’t correspond to any code in <code>comparator.qmd</code> — nothing here moves when you drag a slider. It’s a model of the operating environment the lab sits inside, drawn to show where the reinforcing and balancing pressures actually are.</p>
+<p>The two diagrams below are a proper <strong>causal loop diagram (CLD)</strong>, split for legibility into the <strong>reinforcing engines</strong> that make the business compound and the <strong>balancing loops</strong> that hold them in check. Neither corresponds to any code in <code>comparator.qmd</code> — nothing here moves when you drag a slider. They’re a model of the operating environment the lab sits inside, drawn to show where the reinforcing and balancing pressures actually are. A handful of variables (value, volume, margin, price) appear in both diagrams — that’s the point: they’re the junctions where the growth loops and the constraint loops meet.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -399,89 +401,112 @@ Reading a causal loop diagram
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Each arrow carries a <strong>polarity</strong>. A <strong><code>+</code></strong> means the two variables move <em>the same way</em> (more of the cause → more of the effect, all else equal); a <strong><code>−</code></strong> means they move <em>opposite</em> ways. Trace a loop and count the <code>−</code> signs: an <strong>even</strong> number (including zero) makes it a <strong>reinforcing (R)</strong> loop — a virtuous or vicious cycle that compounds; an <strong>odd</strong> number makes it a <strong>balancing (B)</strong> loop — one that pushes back toward equilibrium. Node colour groups variables by domain: <span style="color:#4a6fa5"><strong>customer</strong></span>, <span style="color:#3f7d54"><strong>commercial</strong></span>, <span style="color:#c08a3e"><strong>delivery / adoption</strong></span>, <span style="color:#c0504d"><strong>cost</strong></span>, and <span style="color:#7a5aa5"><strong>market</strong></span>.</p>
+<p>Each arrow carries a <strong>polarity</strong>. A <strong><code>(+)</code></strong> means the two variables move <em>the same way</em> (more of the cause → more of the effect, all else equal); a <strong><code>(−)</code></strong> means they move <em>opposite</em> ways. Trace a loop and count the <code>(−)</code> signs: an <strong>even</strong> number (including zero) makes it a <strong>reinforcing (R)</strong> loop — a virtuous or vicious cycle that compounds; an <strong>odd</strong> number makes it a <strong>balancing (B)</strong> loop — one that pushes back toward equilibrium. Node colour groups variables by domain: <span style="color:#4a6fa5"><strong>customer</strong></span>, <span style="color:#3f7d54"><strong>commercial</strong></span>, <span style="color:#c08a3e"><strong>delivery / adoption</strong></span>, <span style="color:#c0504d"><strong>cost</strong></span>, and <span style="color:#7a5aa5"><strong>market</strong></span>.</p>
 </div>
 </div>
+<section id="reinforcing-engines-how-growth-compounds-r1-r2" class="level3">
+<h3 class="anchored" data-anchor-id="reinforcing-engines-how-growth-compounds-r1-r2">Reinforcing engines — how growth compounds (R1, R2)</h3>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
 <div>
 <p></p><figure class="figure"><p></p>
 <div>
-<pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "15px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 40, "rankSpacing": 60}}}%%
+<pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 45, "rankSpacing": 65}}}%%
 flowchart LR
-  %% ---- Customer &amp; value ----
   value["Value delivered&lt;br/&gt;to customer"]
   wtp["Customer&lt;br/&gt;willingness-to-pay"]
-  trust["Customer trust"]
-  perceived["Customer-perceived&lt;br/&gt;cost"]
-  churn["Renegotiation &amp;&lt;br/&gt;churn risk"]
-
-  %% ---- Commercial ----
   price["Price achievable"]
   margin["Margin"]
-  vshare["Aggressive M5&lt;br/&gt;value-share"]
-
-  %% ---- Delivery / adoption ----
-  autonomy["Autonomy granted&lt;br/&gt;(L1&amp;rarr;L5)"]
+  reinvest["Reinvestment&lt;br/&gt;in capability"]
+  trust["Customer trust"]
+  autonomy["Autonomy granted&lt;br/&gt;(L1→L5)"]
   volume["Task volume&lt;br/&gt;delivered"]
   proof["Proof points /&lt;br/&gt;references"]
   engage["New engagements"]
-  reinvest["Reinvestment&lt;br/&gt;in capability"]
-  oversight["Human-oversight&lt;br/&gt;hours needed"]
-  capacity["Spare oversight&lt;br/&gt;capacity"]
 
-  %% ---- Cost ----
+  %% R1 Value flywheel
+  value --&gt;|"(+)"| wtp
+  wtp --&gt;|"(+)"| price
+  price --&gt;|"(+)"| margin
+  margin --&gt;|"(+)"| reinvest
+  reinvest --&gt;|"(+)"| value
+
+  %% R2 Land &amp; expand
+  value --&gt;|"(+)"| trust
+  trust --&gt;|"(+)"| autonomy
+  autonomy --&gt;|"(+)"| volume
+  volume --&gt;|"(+)"| proof
+  proof --&gt;|"(+)"| trust
+  proof --&gt;|"(+)"| engage
+  engage --&gt;|"(+)"| volume
+  volume --&gt;|"(+)"| value
+
+  classDef customer fill:#eaf1fb,stroke:#4a6fa5,color:#1a1a1a;
+  classDef commercial fill:#e6f4ea,stroke:#3f7d54,color:#1a1a1a;
+  classDef delivery fill:#fdf1e0,stroke:#c08a3e,color:#1a1a1a;
+
+  class value,wtp,trust customer;
+  class price,margin commercial;
+  class autonomy,volume,proof,engage,reinvest delivery;
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="balancing-loops-what-holds-it-in-check-b1b5" class="level3">
+<h3 class="anchored" data-anchor-id="balancing-loops-what-holds-it-in-check-b1b5">Balancing loops — what holds it in check (B1–B5)</h3>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 45, "rankSpacing": 65}}}%%
+flowchart LR
+  value["Value delivered&lt;br/&gt;to customer"]
+  volume["Task volume&lt;br/&gt;delivered"]
+  margin["Margin"]
+  price["Price achievable"]
   complexity["Task complexity"]
   tokens["Token consumption"]
   compute["P90 compute cost"]
   optim["Model / prompt&lt;br/&gt;optimisation"]
-
-  %% ---- Market ----
+  vshare["Aggressive M5&lt;br/&gt;value-share"]
+  perceived["Customer-perceived&lt;br/&gt;cost"]
+  churn["Renegotiation /&lt;br/&gt;churn risk"]
   maturity["Market maturity"]
   comp["Competitor&lt;br/&gt;pricing pressure"]
-
-  %% R1 Value flywheel
-  value --&gt;|"+"| wtp
-  wtp --&gt;|"+"| price
-  price --&gt;|"+"| margin
-  margin --&gt;|"+"| reinvest
-  reinvest --&gt;|"+"| value
-
-  %% R2 Land &amp; expand
-  value --&gt;|"+"| trust
-  trust --&gt;|"+"| autonomy
-  autonomy --&gt;|"+"| volume
-  volume --&gt;|"+"| proof
-  proof --&gt;|"+"| trust
-  proof --&gt;|"+"| engage
-  engage --&gt;|"+"| volume
-  volume --&gt;|"+"| value
+  oversight["Human-oversight&lt;br/&gt;hours needed"]
+  capacity["Spare oversight&lt;br/&gt;capacity"]
 
   %% B1 Token-cost squeeze
-  volume --&gt;|"+"| tokens
-  complexity --&gt;|"+"| tokens
-  tokens --&gt;|"+"| compute
-  compute --&gt;|"&amp;minus;"| margin
+  volume --&gt;|"(+)"| tokens
+  complexity --&gt;|"(+)"| tokens
+  tokens --&gt;|"(+)"| compute
+  compute --&gt;|"(−)"| margin
 
   %% B2 Efficiency response
-  margin --&gt;|"&amp;minus;"| optim
-  optim --&gt;|"&amp;minus;"| compute
+  margin --&gt;|"(−)"| optim
+  optim --&gt;|"(−)"| compute
 
   %% B3 Value-share / churn cliff
-  value --&gt;|"+"| vshare
-  vshare --&gt;|"+"| perceived
-  perceived --&gt;|"+"| churn
-  churn --&gt;|"&amp;minus;"| volume
+  value --&gt;|"(+)"| vshare
+  vshare --&gt;|"(+)"| perceived
+  perceived --&gt;|"(+)"| churn
+  churn --&gt;|"(−)"| volume
+  volume --&gt;|"(+)"| value
 
   %% B4 Commoditisation
-  margin --&gt;|"+"| comp
-  maturity --&gt;|"+"| comp
-  comp --&gt;|"&amp;minus;"| price
+  margin --&gt;|"(+)"| comp
+  maturity --&gt;|"(+)"| comp
+  comp --&gt;|"(−)"| price
+  price --&gt;|"(+)"| margin
 
   %% B5 Oversight capacity
-  volume --&gt;|"+"| oversight
-  oversight --&gt;|"&amp;minus;"| capacity
-  capacity --&gt;|"+"| volume
+  volume --&gt;|"(+)"| oversight
+  oversight --&gt;|"(−)"| capacity
+  capacity --&gt;|"(+)"| volume
 
   classDef customer fill:#eaf1fb,stroke:#4a6fa5,color:#1a1a1a;
   classDef commercial fill:#e6f4ea,stroke:#3f7d54,color:#1a1a1a;
@@ -489,9 +514,9 @@ flowchart LR
   classDef cost fill:#fdeaea,stroke:#c0504d,color:#1a1a1a;
   classDef market fill:#efeaf7,stroke:#7a5aa5,color:#1a1a1a;
 
-  class value,wtp,trust,perceived,churn customer;
+  class value,perceived,churn customer;
   class price,margin,vshare commercial;
-  class autonomy,volume,proof,engage,reinvest,oversight,capacity delivery;
+  class volume,oversight,capacity delivery;
   class complexity,tokens,compute,optim cost;
   class maturity,comp market;
 </pre>
@@ -500,6 +525,7 @@ flowchart LR
 </div>
 </div>
 </div>
+</section>
 <section id="the-loops-one-at-a-time" class="level3">
 <h3 class="anchored" data-anchor-id="the-loops-one-at-a-time">The loops, one at a time</h3>
 <table class="caption-top table">
@@ -562,7 +588,7 @@ flowchart LR
 </tr>
 </tbody>
 </table>
-<p>The interesting tension is between the two reinforcing engines (R1, R2) and the four balancing loops that constrain them. R1 says <em>capture more value</em>; B3 and B4 say <em>not too much, or you’ll lose the customer or the market</em>. R2 says <em>grow volume</em>; B1 and B5 say <em>volume has a cost and a capacity ceiling</em>. A durable pricing strategy is essentially a choice about which balancing loop you let bind first.</p>
+<p>The interesting tension is between the two reinforcing engines (R1, R2) and the five balancing loops that constrain them. R1 says <em>capture more value</em>; B3 and B4 say <em>not too much, or you’ll lose the customer or the market</em>. R2 says <em>grow volume</em>; B1 and B5 say <em>volume has a cost and a capacity ceiling</em>. A durable pricing strategy is essentially a choice about which balancing loop you let bind first.</p>
 </section>
 </section>
 <section id="known-gaps-dashed-edges-above" class="level2">
