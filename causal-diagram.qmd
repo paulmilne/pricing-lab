@@ -193,6 +193,141 @@ flowchart LR
   price3 --> warn3
 ```
 
+## The wider view: a causal loop diagram
+
+The four diagrams above are *calling sequences* — acyclic maps of how one slider's value
+propagates into a number on the bar chart. They deliberately stop at the edge of the
+spreadsheet. But the business those numbers describe is not acyclic: price feeds margin,
+margin funds capability, capability raises the value delivered, and that in turn changes
+what a customer will pay. Those are **feedback loops**, and they're invisible in a DAG.
+
+This last diagram is a proper **causal loop diagram (CLD)**. It doesn't correspond to any
+code in `comparator.qmd` — nothing here moves when you drag a slider. It's a model of the
+operating environment the lab sits inside, drawn to show where the reinforcing and
+balancing pressures actually are.
+
+::: {.callout-note}
+## Reading a causal loop diagram
+Each arrow carries a **polarity**. A **`+`** means the two variables move *the same way*
+(more of the cause → more of the effect, all else equal); a **`−`** means they move
+*opposite* ways. Trace a loop and count the `−` signs: an **even** number (including zero)
+makes it a **reinforcing (R)** loop — a virtuous or vicious cycle that compounds; an
+**odd** number makes it a **balancing (B)** loop — one that pushes back toward equilibrium.
+Node colour groups variables by domain: <span style="color:#4a6fa5">**customer**</span>,
+<span style="color:#3f7d54">**commercial**</span>,
+<span style="color:#c08a3e">**delivery / adoption**</span>,
+<span style="color:#c0504d">**cost**</span>, and
+<span style="color:#7a5aa5">**market**</span>.
+:::
+
+```{mermaid}
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "15px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 40, "rankSpacing": 60}}}%%
+flowchart LR
+  %% ---- Customer & value ----
+  value["Value delivered<br/>to customer"]
+  wtp["Customer<br/>willingness-to-pay"]
+  trust["Customer trust"]
+  perceived["Customer-perceived<br/>cost"]
+  churn["Renegotiation &<br/>churn risk"]
+
+  %% ---- Commercial ----
+  price["Price achievable"]
+  margin["Margin"]
+  vshare["Aggressive M5<br/>value-share"]
+
+  %% ---- Delivery / adoption ----
+  autonomy["Autonomy granted<br/>(L1&rarr;L5)"]
+  volume["Task volume<br/>delivered"]
+  proof["Proof points /<br/>references"]
+  engage["New engagements"]
+  reinvest["Reinvestment<br/>in capability"]
+  oversight["Human-oversight<br/>hours needed"]
+  capacity["Spare oversight<br/>capacity"]
+
+  %% ---- Cost ----
+  complexity["Task complexity"]
+  tokens["Token consumption"]
+  compute["P90 compute cost"]
+  optim["Model / prompt<br/>optimisation"]
+
+  %% ---- Market ----
+  maturity["Market maturity"]
+  comp["Competitor<br/>pricing pressure"]
+
+  %% R1 Value flywheel
+  value -->|"+"| wtp
+  wtp -->|"+"| price
+  price -->|"+"| margin
+  margin -->|"+"| reinvest
+  reinvest -->|"+"| value
+
+  %% R2 Land & expand
+  value -->|"+"| trust
+  trust -->|"+"| autonomy
+  autonomy -->|"+"| volume
+  volume -->|"+"| proof
+  proof -->|"+"| trust
+  proof -->|"+"| engage
+  engage -->|"+"| volume
+  volume -->|"+"| value
+
+  %% B1 Token-cost squeeze
+  volume -->|"+"| tokens
+  complexity -->|"+"| tokens
+  tokens -->|"+"| compute
+  compute -->|"&minus;"| margin
+
+  %% B2 Efficiency response
+  margin -->|"&minus;"| optim
+  optim -->|"&minus;"| compute
+
+  %% B3 Value-share / churn cliff
+  value -->|"+"| vshare
+  vshare -->|"+"| perceived
+  perceived -->|"+"| churn
+  churn -->|"&minus;"| volume
+
+  %% B4 Commoditisation
+  margin -->|"+"| comp
+  maturity -->|"+"| comp
+  comp -->|"&minus;"| price
+
+  %% B5 Oversight capacity
+  volume -->|"+"| oversight
+  oversight -->|"&minus;"| capacity
+  capacity -->|"+"| volume
+
+  classDef customer fill:#eaf1fb,stroke:#4a6fa5,color:#1a1a1a;
+  classDef commercial fill:#e6f4ea,stroke:#3f7d54,color:#1a1a1a;
+  classDef delivery fill:#fdf1e0,stroke:#c08a3e,color:#1a1a1a;
+  classDef cost fill:#fdeaea,stroke:#c0504d,color:#1a1a1a;
+  classDef market fill:#efeaf7,stroke:#7a5aa5,color:#1a1a1a;
+
+  class value,wtp,trust,perceived,churn customer;
+  class price,margin,vshare commercial;
+  class autonomy,volume,proof,engage,reinvest,oversight,capacity delivery;
+  class complexity,tokens,compute,optim cost;
+  class maturity,comp market;
+```
+
+### The loops, one at a time
+
+| Loop | Type | Chain | What it means for pricing |
+|---|---|---|---|
+| **R1 · Value flywheel** | Reinforcing | value → willingness-to-pay → price → margin → reinvestment → value | The core case for value-based (M4/M5) pricing: capturing more of the value you create funds the capability that creates more value. Left unbalanced it compounds. |
+| **R2 · Land & expand** | Reinforcing | value → trust → autonomy (L1→L5) → volume → proof → (trust / new engagements) → volume → value | Trust earned at low autonomy is what lets you move a customer up the tier ladder; each delivered task is a reference that widens the footprint. This is the growth engine the tier model is built around. |
+| **B1 · Token-cost squeeze** | Balancing | volume × complexity → token consumption → P90 compute cost → margin (−) | Growth is not free: more volume and harder tasks push the *tail* of the cost distribution, which is exactly why the cost side is priced at P90, not the mean. |
+| **B2 · Efficiency response** | Balancing | margin (−) → optimisation (−) → compute cost → margin | A thin margin creates pressure to optimise models and prompts, pulling compute cost back down — the self-correcting counterweight to B1. |
+| **B3 · Value-share / churn cliff** | Balancing | value → aggressive value-share → perceived cost → churn risk → volume (−) | The renegotiation cliff from the M5 Outcome Designer, seen as a loop: the more value you capture, the more the customer feels the price, and past a point they walk. It caps how hard R1 can be pushed. |
+| **B4 · Commoditisation** | Balancing | margin → competitor pressure ← market maturity → price (−) | Fat margins and a maturing market attract competitors whose pricing erodes yours — the long-run ceiling on any single deal's economics. |
+| **B5 · Oversight capacity** | Balancing | volume → human-oversight hours → spare capacity (−) → volume | Agentic work still needs human oversight; as volume grows it consumes the very capacity needed to deliver it, unless autonomy (R2) raises the ceiling. |
+
+The interesting tension is between the two reinforcing engines (R1, R2) and the four
+balancing loops that constrain them. R1 says *capture more value*; B3 and B4 say *not too
+much, or you'll lose the customer or the market*. R2 says *grow volume*; B1 and B5 say
+*volume has a cost and a capacity ceiling*. A durable pricing strategy is essentially a
+choice about which balancing loop you let bind first.
+
 ## Known gaps (dashed edges above)
 
 These are places the model treats inputs as independent when a real pricing conversation

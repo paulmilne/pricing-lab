@@ -135,6 +135,10 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#from-drivers-to-price-cost-margin" id="toc-from-drivers-to-price-cost-margin" class="nav-link" data-scroll-target="#from-drivers-to-price-cost-margin">From drivers to price, cost &amp; margin</a></li>
   <li><a href="#zoom-m2-tier-2" id="toc-zoom-m2-tier-2" class="nav-link" data-scroll-target="#zoom-m2-tier-2">Zoom: M2 Tier 2</a></li>
   <li><a href="#zoom-m3-task" id="toc-zoom-m3-task" class="nav-link" data-scroll-target="#zoom-m3-task">Zoom: M3 Task</a></li>
+  <li><a href="#the-wider-view-a-causal-loop-diagram" id="toc-the-wider-view-a-causal-loop-diagram" class="nav-link" data-scroll-target="#the-wider-view-a-causal-loop-diagram">The wider view: a causal loop diagram</a>
+  <ul class="collapse">
+  <li><a href="#the-loops-one-at-a-time" id="toc-the-loops-one-at-a-time" class="nav-link" data-scroll-target="#the-loops-one-at-a-time">The loops, one at a time</a></li>
+  </ul></li>
   <li><a href="#known-gaps-dashed-edges-above" id="toc-known-gaps-dashed-edges-above" class="nav-link" data-scroll-target="#known-gaps-dashed-edges-above">Known gaps (dashed edges above)</a></li>
   </ul>
 </nav>
@@ -380,6 +384,186 @@ flowchart LR
 </div>
 </div>
 </div>
+</section>
+<section id="the-wider-view-a-causal-loop-diagram" class="level2">
+<h2 class="anchored" data-anchor-id="the-wider-view-a-causal-loop-diagram">The wider view: a causal loop diagram</h2>
+<p>The four diagrams above are <em>calling sequences</em> — acyclic maps of how one slider’s value propagates into a number on the bar chart. They deliberately stop at the edge of the spreadsheet. But the business those numbers describe is not acyclic: price feeds margin, margin funds capability, capability raises the value delivered, and that in turn changes what a customer will pay. Those are <strong>feedback loops</strong>, and they’re invisible in a DAG.</p>
+<p>This last diagram is a proper <strong>causal loop diagram (CLD)</strong>. It doesn’t correspond to any code in <code>comparator.qmd</code> — nothing here moves when you drag a slider. It’s a model of the operating environment the lab sits inside, drawn to show where the reinforcing and balancing pressures actually are.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Reading a causal loop diagram
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Each arrow carries a <strong>polarity</strong>. A <strong><code>+</code></strong> means the two variables move <em>the same way</em> (more of the cause → more of the effect, all else equal); a <strong><code>−</code></strong> means they move <em>opposite</em> ways. Trace a loop and count the <code>−</code> signs: an <strong>even</strong> number (including zero) makes it a <strong>reinforcing (R)</strong> loop — a virtuous or vicious cycle that compounds; an <strong>odd</strong> number makes it a <strong>balancing (B)</strong> loop — one that pushes back toward equilibrium. Node colour groups variables by domain: <span style="color:#4a6fa5"><strong>customer</strong></span>, <span style="color:#3f7d54"><strong>commercial</strong></span>, <span style="color:#c08a3e"><strong>delivery / adoption</strong></span>, <span style="color:#c0504d"><strong>cost</strong></span>, and <span style="color:#7a5aa5"><strong>market</strong></span>.</p>
+</div>
+</div>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">%%{init: {"theme": "base", "themeVariables": {"fontSize": "15px", "primaryColor": "#eaf1fb", "primaryBorderColor": "#4a6fa5", "primaryTextColor": "#1a1a1a", "lineColor": "#7a7a7a"}, "flowchart": {"nodeSpacing": 40, "rankSpacing": 60}}}%%
+flowchart LR
+  %% ---- Customer &amp; value ----
+  value["Value delivered&lt;br/&gt;to customer"]
+  wtp["Customer&lt;br/&gt;willingness-to-pay"]
+  trust["Customer trust"]
+  perceived["Customer-perceived&lt;br/&gt;cost"]
+  churn["Renegotiation &amp;&lt;br/&gt;churn risk"]
+
+  %% ---- Commercial ----
+  price["Price achievable"]
+  margin["Margin"]
+  vshare["Aggressive M5&lt;br/&gt;value-share"]
+
+  %% ---- Delivery / adoption ----
+  autonomy["Autonomy granted&lt;br/&gt;(L1&amp;rarr;L5)"]
+  volume["Task volume&lt;br/&gt;delivered"]
+  proof["Proof points /&lt;br/&gt;references"]
+  engage["New engagements"]
+  reinvest["Reinvestment&lt;br/&gt;in capability"]
+  oversight["Human-oversight&lt;br/&gt;hours needed"]
+  capacity["Spare oversight&lt;br/&gt;capacity"]
+
+  %% ---- Cost ----
+  complexity["Task complexity"]
+  tokens["Token consumption"]
+  compute["P90 compute cost"]
+  optim["Model / prompt&lt;br/&gt;optimisation"]
+
+  %% ---- Market ----
+  maturity["Market maturity"]
+  comp["Competitor&lt;br/&gt;pricing pressure"]
+
+  %% R1 Value flywheel
+  value --&gt;|"+"| wtp
+  wtp --&gt;|"+"| price
+  price --&gt;|"+"| margin
+  margin --&gt;|"+"| reinvest
+  reinvest --&gt;|"+"| value
+
+  %% R2 Land &amp; expand
+  value --&gt;|"+"| trust
+  trust --&gt;|"+"| autonomy
+  autonomy --&gt;|"+"| volume
+  volume --&gt;|"+"| proof
+  proof --&gt;|"+"| trust
+  proof --&gt;|"+"| engage
+  engage --&gt;|"+"| volume
+  volume --&gt;|"+"| value
+
+  %% B1 Token-cost squeeze
+  volume --&gt;|"+"| tokens
+  complexity --&gt;|"+"| tokens
+  tokens --&gt;|"+"| compute
+  compute --&gt;|"&amp;minus;"| margin
+
+  %% B2 Efficiency response
+  margin --&gt;|"&amp;minus;"| optim
+  optim --&gt;|"&amp;minus;"| compute
+
+  %% B3 Value-share / churn cliff
+  value --&gt;|"+"| vshare
+  vshare --&gt;|"+"| perceived
+  perceived --&gt;|"+"| churn
+  churn --&gt;|"&amp;minus;"| volume
+
+  %% B4 Commoditisation
+  margin --&gt;|"+"| comp
+  maturity --&gt;|"+"| comp
+  comp --&gt;|"&amp;minus;"| price
+
+  %% B5 Oversight capacity
+  volume --&gt;|"+"| oversight
+  oversight --&gt;|"&amp;minus;"| capacity
+  capacity --&gt;|"+"| volume
+
+  classDef customer fill:#eaf1fb,stroke:#4a6fa5,color:#1a1a1a;
+  classDef commercial fill:#e6f4ea,stroke:#3f7d54,color:#1a1a1a;
+  classDef delivery fill:#fdf1e0,stroke:#c08a3e,color:#1a1a1a;
+  classDef cost fill:#fdeaea,stroke:#c0504d,color:#1a1a1a;
+  classDef market fill:#efeaf7,stroke:#7a5aa5,color:#1a1a1a;
+
+  class value,wtp,trust,perceived,churn customer;
+  class price,margin,vshare commercial;
+  class autonomy,volume,proof,engage,reinvest,oversight,capacity delivery;
+  class complexity,tokens,compute,optim cost;
+  class maturity,comp market;
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<section id="the-loops-one-at-a-time" class="level3">
+<h3 class="anchored" data-anchor-id="the-loops-one-at-a-time">The loops, one at a time</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Loop</th>
+<th>Type</th>
+<th>Chain</th>
+<th>What it means for pricing</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>R1 · Value flywheel</strong></td>
+<td>Reinforcing</td>
+<td>value → willingness-to-pay → price → margin → reinvestment → value</td>
+<td>The core case for value-based (M4/M5) pricing: capturing more of the value you create funds the capability that creates more value. Left unbalanced it compounds.</td>
+</tr>
+<tr class="even">
+<td><strong>R2 · Land &amp; expand</strong></td>
+<td>Reinforcing</td>
+<td>value → trust → autonomy (L1→L5) → volume → proof → (trust / new engagements) → volume → value</td>
+<td>Trust earned at low autonomy is what lets you move a customer up the tier ladder; each delivered task is a reference that widens the footprint. This is the growth engine the tier model is built around.</td>
+</tr>
+<tr class="odd">
+<td><strong>B1 · Token-cost squeeze</strong></td>
+<td>Balancing</td>
+<td>volume × complexity → token consumption → P90 compute cost → margin (−)</td>
+<td>Growth is not free: more volume and harder tasks push the <em>tail</em> of the cost distribution, which is exactly why the cost side is priced at P90, not the mean.</td>
+</tr>
+<tr class="even">
+<td><strong>B2 · Efficiency response</strong></td>
+<td>Balancing</td>
+<td>margin (−) → optimisation (−) → compute cost → margin</td>
+<td>A thin margin creates pressure to optimise models and prompts, pulling compute cost back down — the self-correcting counterweight to B1.</td>
+</tr>
+<tr class="odd">
+<td><strong>B3 · Value-share / churn cliff</strong></td>
+<td>Balancing</td>
+<td>value → aggressive value-share → perceived cost → churn risk → volume (−)</td>
+<td>The renegotiation cliff from the M5 Outcome Designer, seen as a loop: the more value you capture, the more the customer feels the price, and past a point they walk. It caps how hard R1 can be pushed.</td>
+</tr>
+<tr class="even">
+<td><strong>B4 · Commoditisation</strong></td>
+<td>Balancing</td>
+<td>margin → competitor pressure ← market maturity → price (−)</td>
+<td>Fat margins and a maturing market attract competitors whose pricing erodes yours — the long-run ceiling on any single deal’s economics.</td>
+</tr>
+<tr class="odd">
+<td><strong>B5 · Oversight capacity</strong></td>
+<td>Balancing</td>
+<td>volume → human-oversight hours → spare capacity (−) → volume</td>
+<td>Agentic work still needs human oversight; as volume grows it consumes the very capacity needed to deliver it, unless autonomy (R2) raises the ceiling.</td>
+</tr>
+</tbody>
+</table>
+<p>The interesting tension is between the two reinforcing engines (R1, R2) and the four balancing loops that constrain them. R1 says <em>capture more value</em>; B3 and B4 say <em>not too much, or you’ll lose the customer or the market</em>. R2 says <em>grow volume</em>; B1 and B5 say <em>volume has a cost and a capacity ceiling</em>. A durable pricing strategy is essentially a choice about which balancing loop you let bind first.</p>
+</section>
 </section>
 <section id="known-gaps-dashed-edges-above" class="level2">
 <h2 class="anchored" data-anchor-id="known-gaps-dashed-edges-above">Known gaps (dashed edges above)</h2>
