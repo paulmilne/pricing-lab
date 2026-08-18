@@ -14,6 +14,12 @@ subtitle: "One engagement, priced five ways"
   --label-width: 340px !important;
   --input-width: 220px !important;
 }
+/* Hover targets for the "how each bar is calculated" formulas below —
+   dotted underline signals they're interactive, tippy supplies the popup. */
+.tip-term {
+  border-bottom: 1px dotted #888;
+  cursor: help;
+}
 </style>
 ```
 
@@ -736,14 +742,104 @@ $$\text{overlay}(x) = x \times \big(1 + \text{risk premium}\big) \times \text{au
 where the risk premium runs from +5% (score 1) to +100% (score 10), and the autonomy
 modifier is ×1.00 up to L3, **×1.20 at L4**, and **×1.40 at L5**.
 
-| Model | Monthly price (before overlay) |
-|---|---|
-| **M1 Per Seat** | $\text{FTEs} \times \dfrac{\text{FTE cost}}{12} \times \text{seat discount}$ |
-| **M2 Usage (Tier 1)** | $\dfrac{\text{Infra} + \text{License} + \text{Support} + \text{Risk Reserve} + \text{CoE Overhead}}{1 - \text{margin}}$ |
-| **M2 Usage (Tier 2)** | $(\text{volume} \times \text{calls/task}) \times \Big[\dfrac{\text{unit cost} + \text{allocated overhead}}{1 - \text{margin}} + \text{risk premium}\Big]$ |
-| **M3 Task** | $\text{volume} \times \Big[(\text{hours} \times \text{hourly rate}) \times \text{complexity} + \text{risk premium}\Big]$ |
-| **M4 Hybrid** | $\text{base fee} + \text{value} \times \text{share \%}$ |
-| **M5 Outcome** | $\max\big(\text{floor},\ \min(\text{ceiling},\ \text{value} \times \text{share \%})\big)$ |
+```{ojs}
+//| label: how-each-bar-tex
+//| echo: false
+// \texttip (MathJax's own tooltip) renders through the browser's native
+// `title` attribute — slow to appear (OS-level hover delay) and unstyled.
+// Swapped for tippy.js instead, which Quarto already loads on every page for
+// footnote/xref popovers (window.tippy), so no new dependency. Each term is
+// tagged with \cssId (MathJax's "html" extension, autoloaded by default) so
+// it can be found in the typeset DOM afterwards and handed its own tippy
+// instance, built from the CURRENT slider values — rebuilt on every slider
+// change since this cell depends on those reactive inputs.
+howEachBarTex = {
+  const floorVal = 0.8 * overlay(m4BaseFee);
+  const ceilingVal = ceilMult * floorVal;
+
+  let tipCounter = 0;
+  const tipMap = new Map();
+  // \cssId's second argument is TeX, not plain text, so — unlike \texttip —
+  // it can't carry the tooltip string itself; that lives in tipMap and gets
+  // attached via tippy() below, once the element exists in the DOM.
+  const tip = (mathSrc, tipText) => {
+    const id = `tip-term-${tipCounter++}`;
+    tipMap.set(id, tipText);
+    return `\\cssId{${id}}{\\class{tip-term}{${mathSrc}}}`;
+  };
+
+  const rows = [
+    ["M1 Per Seat",
+      `${tip("\\text{FTEs}", `${fteCount} FTEs`)} \\times \\dfrac{${tip("\\text{FTE cost}", `${gbp(fteCost)}/yr`)}}{12} \\times ${tip("\\text{seat discount}", `${(seatDiscount * 100).toFixed(0)}% of human rate`)}`],
+    ["M2 Usage (Tier 1)",
+      `\\dfrac{${tip("\\text{Infra}", `${gbp(m2Infra)}/mo`)} + ${tip("\\text{License}", `${gbp(m2License)}/mo`)} + ${tip("\\text{Support}", `${gbp(m2Support)}/mo`)} + ${tip("\\text{Risk Reserve}", `${gbp(m2RiskReserve)}/mo`)} + ${tip("\\text{CoE Overhead}", `${gbp(m2CoEOverhead)}/mo`)}}{1 - ${tip("\\text{margin}", `${(m2Margin * 100).toFixed(0)}%`)}}`],
+    ["M2 Usage (Tier 2)",
+      `(${tip("\\text{volume}", `${volume.toLocaleString()} tasks/mo`)} \\times ${tip("\\text{calls/task}", `${m2CallsPerTask} calls`)}) \\times \\Big[\\dfrac{${tip("\\text{unit cost}", `${gbpUnit(m2ComputeCostMean)}/call (mean)`)} + ${tip("\\text{allocated overhead}", `${gbpUnit(m2AllocOverhead)}/call`)}}{1 - ${tip("\\text{margin}", `${(m2T2Margin * 100).toFixed(0)}%`)}} + ${tip("\\text{risk premium}", `${gbpUnit(m2T2RiskPrem)}/call`)}\\Big]`],
+    ["M3 Task",
+      `${tip("\\text{volume}", `${volume.toLocaleString()} tasks/mo`)} \\times \\Big[(${tip("\\text{hours}", `${m3Hours} hr/task`)} \\times ${tip("\\text{hourly rate}", `${gbp(m3Rate)}/hr`)}) \\times ${tip("\\text{complexity}", `×${m3Complexity.toFixed(1)}`)} + ${tip("\\text{risk premium}", `${gbp(m3RiskPrem)}/task`)}\\Big]`],
+    ["M4 Hybrid",
+      `${tip("\\text{base fee}", `${gbp(m4BaseFee)}/mo`)} + ${tip("\\text{value}", `${gbp(value)}/mo`)} \\times ${tip("\\text{share \\%}", `${(m4Share * 100).toFixed(1)}%`)}`],
+    ["M5 Outcome",
+      `\\max\\big(${tip("\\text{floor}", `${gbp(floorVal)}/mo`)},\\ \\min(${tip("\\text{ceiling}", `${gbp(ceilingVal)}/mo`)},\\ ${tip("\\text{value}", `${gbp(value)}/mo`)} \\times ${tip("\\text{share \\%}", `${(m5Share * 100).toFixed(1)}%`)})\\big)`],
+  ];
+
+  const container = document.createElement("div");
+  container.innerHTML = `
+    <table class="table caption-top">
+      <thead><tr><th>Model</th><th>Monthly price (before overlay)</th></tr></thead>
+      <tbody>
+        ${rows.map(([name, formula]) => `<tr><td><strong>${name}</strong></td><td>\\(${formula}\\)</td></tr>`).join("\n")}
+      </tbody>
+    </table>`;
+
+  // Tear down the previous render's tooltips before building the new ones.
+  // Deliberately a plain global, not an OJS `mutable` — this cell both
+  // reads and writes its bookkeeping of live tippy instances, and doing
+  // that through a `mutable` (as an earlier version did) makes the cell
+  // reactively depend on its own output: every write retriggers itself,
+  // producing an infinite render loop that continuously detaches and
+  // rebuilds the table (visible as the tip terms never settling long
+  // enough for a hover tooltip to appear). A plain global sidesteps
+  // Observable's dependency graph entirely for this internal state.
+  if (!window.__howEachBarTipInstances) window.__howEachBarTipInstances = [];
+  window.__howEachBarTipInstances.forEach((t) => t.destroy());
+
+  // typesetPromise (not the synchronous typeset()) matters here: \cssId
+  // comes from MathJax's "html" extension, which is autoloaded on first use
+  // rather than bundled up front. The synchronous call returns before that
+  // load finishes, so the container can briefly hold MathJax's own
+  // "undefined control sequence" error glyph for \cssId — and once the
+  // extension does load and MathJax quietly retypesets in the background,
+  // the tippy instances below would already be attached to nodes that no
+  // longer exist. Awaiting the promise guarantees typesetting (including
+  // any first-time extension load) is actually finished before we go
+  // looking for #tip-term-N elements.
+  if (window.MathJax) {
+    try {
+      await window.MathJax.typesetPromise([container]);
+    } catch (err) {
+      console.error("MathJax typeset failed in howEachBarTex:", err);
+    }
+  }
+
+  const newInstances = [];
+  if (window.tippy) {
+    for (const [id, text] of tipMap) {
+      const el = container.querySelector(`#${id}`);
+      if (el) {
+        newInstances.push(window.tippy(el, {
+          content: text,
+          delay: [80, 0],
+          theme: "light-border",
+        }));
+      }
+    }
+  }
+  window.__howEachBarTipInstances = newInstances;
+
+  return container;
+}
+```
 
 **M2 has two personalities, and the deployment tier picks between them automatically.** In
 **Tier 1** it's a flat internal cost-recovery number (no risk term of its own, so it *does*
@@ -752,6 +848,23 @@ take the overlay) — notice it doesn't move at all when you change the *volume*
 carries its own risk premium, so it **skips** the generic overlay to avoid double-counting
 risk. M2 isn't offered at all in Tier 3, so its fine-tune sliders simply have no bar to
 affect there.
+
+**Where Tier 2's "unit cost" comes from.** It isn't a flat guess — it's a per-call AI compute
+cost, modelled the same way as M3's token cost (and `token-distribution.qmd`): tokens per call
+are log-normal, set by the *median tokens/call* and *token CoV* sliders, and converted to £ via
+the *token rate* slider:
+
+$$\mu = \ln(\text{median tokens}) + \ln\!\left(\frac{\text{token rate}}{1000}\right), \qquad
+\sigma = \sqrt{\ln\!\left(1 + \text{CoV}^2\right)}$$
+
+$$\text{unit cost}_{\text{mean}} = \exp\!\left(\mu + \frac{\sigma^2}{2}\right), \qquad
+\text{unit cost}_{\text{P90}} = \exp\!\left(\mu + z_{0.90}\,\sigma\right)$$
+
+The **quoted price** above uses $\text{unit cost}_{\text{mean}}$ — standard cost-plus practice,
+since you can't quote a customer a percentile. The **vendor cost** used for the profit/margin
+chart instead uses $\text{unit cost}_{\text{P90}}$, so the displayed margin reflects the fat
+tail of expensive calls rather than an optimistic average (see the sensitivity callout above
+for how much the two diverge as CoV rises).
 
 **M3 follows the same logic as M2 Tier 2**: it's the CoE reference doc's task-pricing
 formula directly, with its own per-task risk premium, rather than the generic risk/autonomy
