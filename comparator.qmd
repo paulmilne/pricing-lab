@@ -857,14 +857,59 @@ the *token rate* slider:
 $$\mu = \ln(\text{median tokens}) + \ln\!\left(\frac{\text{token rate}}{1000}\right), \qquad
 \sigma = \sqrt{\ln\!\left(1 + \text{CoV}^2\right)}$$
 
-$$\text{unit cost}_{\text{mean}} = \exp\!\left(\mu + \frac{\sigma^2}{2}\right), \qquad
-\text{unit cost}_{\text{P90}} = \exp\!\left(\mu + z_{0.90}\,\sigma\right)$$
+$$\cssId{tip-unit-cost-mean-def}{\class{tip-term}{\text{unit cost}_{\text{mean}}}} = \exp\!\left(\mu + \frac{\sigma^2}{2}\right), \qquad
+\cssId{tip-unit-cost-p90-def}{\class{tip-term}{\text{unit cost}_{\text{P90}}}} = \exp\!\left(\mu + z_{0.90}\,\sigma\right)$$
 
-The **quoted price** above uses $\text{unit cost}_{\text{mean}}$ — standard cost-plus practice,
+The **quoted price** above uses $\cssId{tip-unit-cost-mean-ref}{\class{tip-term}{\text{unit cost}_{\text{mean}}}}$ — standard cost-plus practice,
 since you can't quote a customer a percentile. The **vendor cost** used for the profit/margin
-chart instead uses $\text{unit cost}_{\text{P90}}$, so the displayed margin reflects the fat
+chart instead uses $\cssId{tip-unit-cost-p90-ref}{\class{tip-term}{\text{unit cost}_{\text{P90}}}}$, so the displayed margin reflects the fat
 tail of expensive calls rather than an optimistic average (see the sensitivity callout above
 for how much the two diverge as CoV rises).
+
+```{ojs}
+//| label: unit-cost-prose-tips
+//| echo: false
+// Unlike howEachBarTex above, this formula block is plain document
+// markdown/LaTeX, typeset once by Quarto's page-level MathJax rather than
+// rebuilt inside an OJS cell. The \cssId tags added to the "unit cost" terms
+// above just give us stable hooks; this cell (re)attaches tippy tooltips to
+// those hooks with the current £ values, and reruns whenever the underlying
+// sliders change so the numbers stay live.
+{
+  const targets = [
+    ["tip-unit-cost-mean-def", `${gbpUnit(m2ComputeCostMean)}/call — the mean of the log-normal token-cost distribution`],
+    ["tip-unit-cost-p90-def",  `${gbpUnit(m2ComputeCostP90)}/call — the 90th percentile of the same distribution`],
+    ["tip-unit-cost-mean-ref", `${gbpUnit(m2ComputeCostMean)}/call — what the quoted price is built from`],
+    ["tip-unit-cost-p90-ref",  `${gbpUnit(m2ComputeCostP90)}/call — what the vendor-cost/margin chart is built from`],
+  ];
+
+  if (!window.__unitCostProseTips) window.__unitCostProseTips = [];
+  window.__unitCostProseTips.forEach((t) => t.destroy());
+
+  // The static prose above is typeset by Quarto's page MathJax on load,
+  // which can race with this cell's first run — poll briefly rather than
+  // assume the #tip-unit-cost-*-{def,ref} nodes already exist in the DOM.
+  const findEl = (id, tries = 20) => new Promise((resolve) => {
+    const attempt = () => {
+      const el = document.getElementById(id);
+      if (el || tries-- <= 0) return resolve(el);
+      setTimeout(attempt, 100);
+    };
+    attempt();
+  });
+
+  const instances = [];
+  if (window.tippy) {
+    for (const [id, text] of targets) {
+      const el = await findEl(id);
+      if (el) {
+        instances.push(window.tippy(el, {content: text, delay: [80, 0], theme: "light-border"}));
+      }
+    }
+  }
+  window.__unitCostProseTips = instances;
+}
+```
 
 **M3 follows the same logic as M2 Tier 2**: it's the CoE reference doc's task-pricing
 formula directly, with its own per-task risk premium, rather than the generic risk/autonomy

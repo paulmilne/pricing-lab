@@ -1,34 +1,41 @@
 ---
 title: "Agentic AI Pricing Lab"
 subtitle: "Experiment with the pricing models from the lecture"
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
 ## Why this exists
 
 In the lecture we opened with a puzzle:
 
-> You build an agent that reviews contracts. It does the work of three paralegals.
-> It costs you **£200 a month** to run. A law firm pays **£180,000 a year** for those people.
-> So… **what do you charge?**
+> You build an agent that reviews contracts. It does the work of three
+> paralegals. It costs you **£200 a month** to run. A law firm pays
+> **£180,000 a year** for those people. So… **what do you charge?**
 
-The point of that puzzle was that there is *no single answer*. The same piece of
-software can be priced anywhere from "cost plus a little" to "a share of the value it
-unlocks" — a spread of **100× or more** — depending only on the **commercial model** you
-choose and the **risk** you take on.
+The point of that puzzle was that there is *no single answer*. The same
+piece of software can be priced anywhere from "cost plus a little" to "a
+share of the value it unlocks" — a spread of **100× or more** —
+depending only on the **commercial model** you choose and the **risk**
+you take on.
 
-These pages let you drive the models yourself. Move the sliders, watch the price move,
-and build the intuition that the framework tries to capture.
+These pages let you drive the models yourself. Move the sliders, watch
+the price move, and build the intuition that the framework tries to
+capture.
 
-::: {.callout-note}
+::: callout-note
 ## Everything here runs in your browser
-There is no server. The calculators run as code inside this page, so you can fork the
-site, change the formulas, and host your own version on GitHub Pages for free.
+
+There is no server. The calculators run as code inside this page, so you
+can fork the site, change the formulas, and host your own version on
+GitHub Pages for free.
 :::
 
 ## The modules
 
 | Module | What you'll learn |
-|---|---|
+|------------------------------------|------------------------------------|
 | [**Model Selector**](decision-tree.qmd) | Answer a few questions, get a recommended tier, model, and approval path. |
 | [**Five-Model Comparator**](comparator.qmd) | Price one engagement under all five models at once — see the spread. |
 | [**Token Distribution & the P90 Floor**](token-distribution.qmd) | Why pricing at the *mean* loses money, with a Monte-Carlo margin simulation. |
@@ -38,15 +45,16 @@ site, change the formulas, and host your own version on GitHub Pages for free.
 ## A reminder on the five models
 
 | Model | Charging basis | Risk / reward |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | **M1 · Per Seat** | Per agent "seat", benchmarked to a human FTE | Low / Low |
 | **M2 · Usage** | Per token, call, or transaction | Low / Low |
 | **M3 · Task** | Per completed unit of work | Low / Medium |
 | **M4 · Hybrid** | Base platform fee + a usage or outcome layer | Low / Medium–High |
 | **M5 · Outcome** | A share of the value delivered | Medium–High / Very High |
 
-> The numbers in these tools are **illustrative** — calibrated to teach the *shape* of each
-> model, not to quote a real deal. For live engagements, use the CoE pricing templates.
+> The numbers in these tools are **illustrative** — calibrated to teach
+> the *shape* of each model, not to quote a real deal. For live
+> engagements, use the CoE pricing templates.
 
 ::: {.text-muted style="font-size: 0.85em; margin-top: 2em;"}
 Version 1.3.0 · Last updated 15 Jul 2026
