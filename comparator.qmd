@@ -641,7 +641,7 @@ call-per-task pattern before trusting the comparison.
 ::: {.callout-tip collapse="true" title="M3's compute cost: tokens, not a flat guess — and costed at the tail, not the mean"}
 An earlier version of this page modelled M3's compute cost as a flat "£ per task" guess.
 That was wrong on two counts: AI compute cost is fundamentally a **token cost** (tokens per
-task × £ per 1,000 tokens), and — per `token-distribution.qmd` — token cost per task is a
+task × £ per 1,000 tokens), and — per [Token Distribution & the P90 Floor](token-distribution.qmd) — token cost per task is a
 **long-tailed distribution**, not a single number. Pricing (or costing) off the *mean* of
 that distribution quietly ignores the tail of expensive runs, so M3's cost basis here uses
 the **P90** of the same log-normal model that page uses (median tokens + Coefficient of
@@ -670,7 +670,7 @@ Inputs.table(
 //| echo: false
 html`<p>At the current token settings, costing off the mean instead of the P90 would
 understate M3's true cost by <b>${((1 - m3ComputeCostMean / m3ComputeCostP90) * 100).toFixed(0)}%</b>
-— the same mistake <code>token-distribution.qmd</code> warns about, just showing up here as
+— the same mistake <a href="token-distribution.qmd">Token Distribution &amp; the P90 Floor</a> warns about, just showing up here as
 an inflated margin instead of a mispriced quote.</p>`
 ```
 
@@ -702,7 +702,7 @@ Inputs.table(
 At low CoV (a narrow, predictable token distribution) the P90 sits close to the mean, so
 margin is high and stable. As CoV climbs toward the realistic 0.6–0.8 range, the P90 tail
 stretches further from the mean, compute cost rises, and margin compresses — exactly the
-lesson `token-distribution.qmd` teaches, now showing up directly in M3's numbers.
+lesson [Token Distribution & the P90 Floor](token-distribution.qmd) teaches, now showing up directly in M3's numbers.
 :::
 
 ```{ojs}
@@ -857,7 +857,7 @@ risk. M2 isn't offered at all in Tier 3, so its fine-tune sliders simply have no
 affect there.
 
 **Where Tier 2's "unit cost" comes from.** It isn't a flat guess — it's a per-call AI compute
-cost, modelled the same way as M3's token cost (and `token-distribution.qmd`): tokens per call
+cost, modelled the same way as M3's token cost (and [Token Distribution & the P90 Floor](token-distribution.qmd)): tokens per call
 are log-normal, set by the *median tokens/call* and *token CoV* sliders, and converted to £ via
 the *token rate* slider:
 
