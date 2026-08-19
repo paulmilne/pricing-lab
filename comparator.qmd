@@ -876,6 +876,13 @@ for how much the two diverge as CoV rises).
 ```{ojs}
 //| label: unit-cost-prose-tips
 //| echo: false
+//| output: false
+// This cell exists purely for the DOM side effect below (attaching tooltips
+// to static nodes) and never has a meaningful value to show — `output:
+// false` suppresses the result panel outright. (Returning `null` alone
+// wasn't enough: OJS's inspector prints null/undefined as literal text
+// rather than rendering nothing, so the cell's return value doesn't matter
+// here as long as output is off.)
 // Unlike howEachBarTex above, this formula block is plain document
 // markdown/LaTeX, typeset once by Quarto's page-level MathJax rather than
 // rebuilt inside an OJS cell. The \cssId tags added to the "unit cost" terms
@@ -915,11 +922,6 @@ for how much the two diverge as CoV rises).
     }
   }
   window.__unitCostProseTips = instances;
-  // This cell's only job is the side effect above (attaching tooltips to
-  // static DOM nodes) — without an explicit return, the block evaluates to
-  // undefined, which OJS then prints on the page as the literal text
-  // "undefined". Returning null gives it a displayable-but-empty value instead.
-  return null;
 }
 ```
 
