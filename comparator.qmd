@@ -317,7 +317,9 @@ tokenDistLink = (median, cv, rate, vol, price, meanCost) => {
     volume: Math.max(100, Math.min(5000, Math.round(vol))),
     markup: markup,
   });
-  return `token-distribution.qmd?${params}`;
+  // Built as a plain JS string, so it never passes through Quarto's
+  // .qmd -> .html link rewriting — point at the rendered .html directly.
+  return `token-distribution.html?${params}`;
 }
 m3TokenDistHref = tokenDistLink(m3MedianTokens, m3TokenCoV, m3TokenRate, volume, m3TaskPrice, m3ComputeCostMean)
 m2TokenDistHref = tokenDistLink(m2MedianTokens, m2TokenCoV, m2TokenRate, m2EffectiveCalls, m2UnitPrice, m2ComputeCostMean)
