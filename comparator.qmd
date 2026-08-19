@@ -123,16 +123,16 @@ viewof seatDiscount = withDescription(Inputs.range([0.4, 0.7],   {value: 0.5,  s
 // costs disappear from the vendor's own stack — the cloud provider bears them
 // and instead charges the vendor a base fee + usage, which shows up here as
 // License cost, not Infrastructure cost. Set Infrastructure to ~£0 in that case.
-viewof m2Infra      = withDescription(Inputs.range([0, 5000],   {value: 1200, step: 100,  label: "M2 · infrastructure cost (£/mo — compute+storage+network; 0 if self-managed infra not used)"}),
+viewof m2Infra      = withDescription(Inputs.range([0, 5000],   {value: 1200, step: 100,  label: "M2 T1 · infrastructure cost (£/mo — compute+storage+network; 0 if self-managed infra not used)"}),
   "Part of M2 Tier 1's cost-recovery breakdown. Set to ~£0 if you're building on third-party cloud/API infrastructure rather than self-hosting — those costs belong under License instead.")
-viewof m2License     = withDescription(Inputs.range([100, 5000], {value: 900,  step: 100,  label: "M2 · license cost (£/mo — vendor fees per agent/API call; incl. 3rd-party base fee + usage if outsourced)"}),
+viewof m2License     = withDescription(Inputs.range([100, 5000], {value: 900,  step: 100,  label: "M2 T1 · license cost (£/mo — vendor fees per agent/API call; incl. 3rd-party base fee + usage if outsourced)"}),
   "Vendor/platform fees — including a third-party cloud provider's own base fee + usage, if you're not self-hosting the infrastructure above.")
-viewof m2Support    = withDescription(Inputs.range([200, 5000],  {value: 1500, step: 100,  label: "M2 · support cost (£/mo — CoE FTE allocation)"}),
+viewof m2Support    = withDescription(Inputs.range([200, 5000],  {value: 1500, step: 100,  label: "M2 T1 · support cost (£/mo — CoE FTE allocation)"}),
   "CoE FTE time allocated to supporting this engagement.")
-viewof m2CoEOverhead = withDescription(Inputs.range([100, 3000], {value: 600,  step: 100,  label: "M2 · CoE overhead (£/mo — governance, training, monitoring)"}),
+viewof m2CoEOverhead = withDescription(Inputs.range([100, 3000], {value: 600,  step: 100,  label: "M2 T1 · CoE overhead (£/mo — governance, training, monitoring)"}),
   "Governance, training and monitoring overhead allocated to this engagement.")
-viewof m2Margin     = withDescription(Inputs.range([0, 0.20],    {value: 0.15, step: 0.01, label: "M2 · margin (0–20%, cost recovery)"}),
-  "Cost-recovery margin for M2 Tier 1 — capped low (0–20%) because internal cost recovery isn't meant to turn a large profit.")
+viewof m2Margin     = withDescription(Inputs.range([0, 0.40],    {value: 0.15, step: 0.01, label: "M2 T1 · margin (0–40%, cost recovery)"}),
+  "Cost-recovery margin for M2 Tier 1 — kept fairly low (0–40%) because internal cost recovery isn't meant to turn a large profit. Note the risk/autonomy overlay applied on top adds further pure profit that this slider doesn't capture — see the note under the chart.")
 
 // M2 · Tier 2 platform-usage formula (CoE reference doc):
 // Price per Unit = [(Unit Cost + Allocated Overhead) / (1 - Margin)] + Risk Premium
@@ -168,8 +168,8 @@ viewof m2AllocOverhead = withDescription(Inputs.range([0.01, 1], {value: 0.05, s
 // isn't already showing a loss once P90 tail cost is accounted for — see
 // the M2 Tier 2 sensitivity callout below for why mean-based pricing here
 // runs this close to the edge in the first place.
-viewof m2T2Margin   = withDescription(Inputs.range([0.30, 0.50], {value: 0.50, step: 0.01, label: "M2 T2 · target margin (30–50%)"}),
-  "Target margin baked into the quoted price, capped at 30–50% per the CoE doc's Tier 2 range. The *realized* margin (using P90 cost) is usually thinner than this — see the callout below.")
+viewof m2T2Margin   = withDescription(Inputs.range([0, 0.60], {value: 0.50, step: 0.01, label: "M2 T2 · target margin (0–60%)"}),
+  "Target margin baked into the quoted price. The CoE doc's Tier 2 guidance is 30–50%; this slider runs wider (0–60%) so you can see how far the realized margin (using P90 cost) drifts below this target as it changes — see the note under the chart and the callout further down.")
 // Defaults calibrated against the default engagement (3 FTEs × £60k/yr ≈
 // £15,000/mo, ≈480 working hours/mo): at 1,000 tasks/mo × 0.5hr, M3 implies
 // ~500 hours — close to that capacity — instead of the previous 1,000
@@ -512,6 +512,13 @@ Plot.plot({
   ]
 })
 ```
+
+*The margin % printed above each bar is a* realized *margin — (price − cost) ÷ price, using
+the cost line shown when you hover — not the margin you set on a slider. The two usually
+differ: M2 Tier 1's risk/autonomy overlay stacks pure profit on top of its cost-recovery
+margin (so the bar reads higher than the slider), while M2 Tier 2's price is quoted off the
+mean token cost but costed here against the fatter P90 tail (so the bar reads lower than the
+target). See "How vendor cost is estimated here" and the sensitivity callouts below for why.*
 
 ::: {.callout-note collapse="true"}
 ## How "vendor cost" is estimated here
@@ -908,6 +915,11 @@ for how much the two diverge as CoV rises).
     }
   }
   window.__unitCostProseTips = instances;
+  // This cell's only job is the side effect above (attaching tooltips to
+  // static DOM nodes) — without an explicit return, the block evaluates to
+  // undefined, which OJS then prints on the page as the literal text
+  // "undefined". Returning null gives it a displayable-but-empty value instead.
+  return null;
 }
 ```
 
