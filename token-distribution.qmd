@@ -144,6 +144,60 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
+<div id="deep-link-status" style="display:none;margin:-0.4em 0 1em;font-size:0.9em;color:#555;"></div>
+
+<script>
+// If this page was opened via a link that carries median/cv/rate/volume/
+// markup query params (e.g. from the Comparator's "current settings"
+// links), push those values into the sliders once the shinylive app has
+// actually booted. The app runs in its own iframe (spun up async by the
+// in-browser R/WASM runtime, on a randomised internal URL), so there's no
+// query string to read from *inside* it — we read it here, on the host
+// page, and reach into the iframe once it's ready.
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const fields = ["median", "cv", "rate", "volume", "markup"];
+  const values = {};
+  fields.forEach((f) => {
+    if (params.has(f)) values[f] = parseFloat(params.get(f));
+  });
+  if (Object.keys(values).length === 0) return;
+
+  const statusEl = document.getElementById("deep-link-status");
+  statusEl.style.display = "block";
+  statusEl.textContent = "Loading the scenario passed in from the link you followed…";
+
+  let attempts = 0;
+  const maxAttempts = 200; // ~60s at 300ms — first WASM load can be slow
+  const timer = setInterval(() => {
+    attempts++;
+    const iframe = document.querySelector(".app-frame");
+    const win = iframe && iframe.contentWindow;
+    const ready =
+      win && win.Shiny && win.jQuery &&
+      Object.keys(values).every((id) => win.jQuery("#" + id).length > 0);
+
+    if (ready) {
+      clearInterval(timer);
+      Object.entries(values).forEach(([id, val]) => {
+        const $el = win.jQuery("#" + id);
+        const slider = $el.data("ionRangeSlider");
+        if (slider) {
+          slider.update({ from: val });
+        } else {
+          win.Shiny.setInputValue(id, val, { priority: "event" });
+        }
+      });
+      statusEl.textContent = "Sliders pre-set from the link you followed.";
+      setTimeout(() => { statusEl.style.display = "none"; }, 4000);
+    } else if (attempts >= maxAttempts) {
+      clearInterval(timer);
+      statusEl.textContent = "Couldn't pre-set sliders automatically — set them manually below.";
+    }
+  }, 300);
+})();
+</script>
+
 ## What you're seeing
 
 The **Coefficient of Variation (CoV)** is the standard deviation of cost-per-task divided by
